@@ -1,0 +1,19 @@
+# Dependencies & build output
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Microsoft Office temp / lock files
+~$*
+
+# Local test artifacts (screenshot hasil share)
+simulasi-kpr*.png
+
+# Reference image (hapus baris ini kalau mau ikut di-commit)
+57ea6750bbdffbefde775676d5e6134e.jpg
