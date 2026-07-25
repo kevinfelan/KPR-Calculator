@@ -47,7 +47,7 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(({ result, kpr1, take
   return (
     <div ref={ref} style={{ width: 720, background: '#ffffff', color: C.text, fontFamily: "'Segoe UI', system-ui, Arial, sans-serif", padding: 28 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-        <Logo size={40} />
+        <Logo size={40} color="#1f7e67" />
         <div>
           <div style={{ fontWeight: 700, fontSize: 20, color: C.ink, letterSpacing: '-0.01em' }}>Kev's KPR Calculator</div>
           <div style={{ fontSize: 13, color: C.muted }}>Simulasi KPR Take Over</div>

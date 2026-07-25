@@ -339,6 +339,20 @@ button { font-family: inherit; }
 .toast .i-check { color: var(--mint); font-size: 18px; }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
+/* ----------------------------- share modal ------------------------------ */
+.sharebody { padding: 14px 16px; display: flex; align-items: center; justify-content: center; min-height: 120px; }
+.share-preview { max-width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); display: block; }
+.share-loading { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; padding: 28px 12px; }
+.share-error { color: var(--bad); font-size: 14px; padding: 28px 12px; text-align: center; }
+.linkbtn { background: none; border: none; color: var(--green-card); font-weight: 700; cursor: pointer; text-decoration: underline; font-size: 14px; }
+.spinner { width: 18px; height: 18px; border: 2px solid var(--line); border-top-color: var(--green-card); border-radius: 50%; animation: spin 0.7s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.share-actions { display: flex; gap: 10px; padding: 4px 16px 18px; }
+.share-actions .dlgbtn { flex: 1; justify-content: center; }
+.dlgbtn--wa { background: #25d366; border: none; color: #fff; border-bottom: 3px solid #1fb457; }
+.dlgbtn--wa:hover { filter: brightness(1.03); color: #fff; }
+.dlgbtn--wa:active { transform: translateY(1px); border-bottom-width: 2px; }
+
 .tbl--history { min-width: 720px; }
 .tbl--history th { white-space: nowrap; padding: 10px 12px; position: sticky; top: 0; background: var(--surface); z-index: 1; }
 .tbl--history td { padding: 12px; white-space: nowrap; color: var(--text); }
