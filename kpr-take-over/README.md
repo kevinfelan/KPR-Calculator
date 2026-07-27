@@ -13,7 +13,8 @@ Mesin hitung mereplikasi persis file `Perhitungan KPR Take Over.xlsx` (skema anu
 - **Panel hasil lengkap** — penghematan, rincian biaya (bunga KPR 1, bunga KPR 2, biaya take over), perbandingan cicilan Bank 1 vs Bank 2, serta jadwal angsuran per tahun + grafik batang fix/floating.
 - **Riwayat simulasi** — simpan (dengan nama properti) dan buka kembali; disimpan lokal di perangkat (localStorage, tanpa server).
 - **Tema terang/gelap** dengan toggle, pilihan tersimpan.
-- **Bagikan ke WhatsApp** — buat gambar ringkasan simulasi (termasuk tabel perbandingan bunga) lalu share via Web Share API (HP) atau unduh + WhatsApp Web (desktop).
+- **Bagikan simulasi** — tombol share membuat gambar ringkasan (termasuk tabel perbandingan bunga & cicilan Bank 1 vs Bank 2), menampilkannya di pratinjau, lalu bisa dibagikan lewat share sheet HP (WhatsApp / simpan ke galeri) atau **diunduh sebagai PNG**.
+- **Keterangan field** — ikon "i" di tiap label; muncul saat hover di PC dan saat di-tap di HP.
 - **PWA** — installable & offline (service worker).
 
 ## Menjalankan
@@ -49,7 +50,7 @@ npm run preview    # pratinjau hasil build
 2. Atur **take over di bulan ke** — titik saat pindah ke bank baru (umumnya di akhir masa fix).
 3. Isi **penawaran take over (Bank 2)**: tenor, masa fix, bunga, serta biaya (provisi, asuransi, penalti).
 4. Hasil tampil otomatis: penghematan, rincian biaya, perbandingan cicilan, dan jadwal angsuran.
-5. **Simpan simulasi** untuk membuka kembali dari ikon riwayat, atau **bagikan ke WhatsApp** lewat tombol di kanan atas.
+5. **Simpan simulasi** untuk membuka kembali dari ikon riwayat, atau **bagikan** (ikon share di kanan atas) → pratinjau gambar → kirim ke WhatsApp / unduh PNG.
 
 ## Model perhitungan
 
