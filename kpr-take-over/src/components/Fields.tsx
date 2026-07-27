@@ -2,10 +2,35 @@ import { useEffect, useRef, useState } from 'react';
 import { formatAngka, parseAngka, formatPersen, parsePersen, tahunDariBulan } from '../lib/format';
 
 function Info({ text }: { text?: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: Event) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, [open]);
+
   if (!text) return null;
   return (
-    <span className="info" title={text} aria-label={text}>
-      i
+    <span className={`info-wrap${open ? ' is-open' : ''}`} ref={ref}>
+      <button
+        type="button"
+        className="info"
+        aria-label={text}
+        aria-expanded={open}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((o) => !o);
+        }}
+      >
+        i
+      </button>
+      <span className="info-pop" role="tooltip">{text}</span>
     </span>
   );
 }

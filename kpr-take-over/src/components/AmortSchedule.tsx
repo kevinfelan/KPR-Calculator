@@ -57,7 +57,7 @@ export function AmortSchedule({ title, data }: Props) {
                   </td>
                   <td title={formatRupiah(g.bunga)}>{formatRingkas(g.bunga)}</td>
                   <td title={formatRupiah(g.pokok)}>{formatRingkas(g.pokok)}</td>
-                  <td title={formatRupiah(g.saldo)}>{formatRingkas(g.saldo)}</td>
+                  <td title={formatRupiah(Math.max(0, g.saldo))}>{formatRingkas(Math.max(0, g.saldo))}</td>
                 </tr>
               ))}
             </tbody>

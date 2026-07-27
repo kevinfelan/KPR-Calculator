@@ -9,12 +9,14 @@ const number0 = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
 /** Rp 2.000.000.000 */
 export function formatRupiah(n: number): string {
   if (!isFinite(n)) return '-';
-  return rupiah0.format(Math.round(n));
+  const r = Math.round(n);
+  return rupiah0.format(r === 0 ? 0 : r); // hindari "-Rp 0" untuk nilai yang membulat ke nol
 }
 
 /** Format ringkas: Rp 2,20 M / Rp 594,4 jt / Rp 850 rb */
 export function formatRingkas(n: number): string {
   if (!isFinite(n)) return '-';
+  if (Math.abs(n) < 0.5) return 'Rp 0'; // hindari "-Rp 0"
   const abs = Math.abs(n);
   const sign = n < 0 ? '-' : '';
   if (abs >= 1e12) return `${sign}Rp ${(abs / 1e12).toLocaleString('id-ID', { maximumFractionDigits: 2 })} T`;

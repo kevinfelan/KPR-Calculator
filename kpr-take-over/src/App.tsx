@@ -175,13 +175,13 @@ export default function App() {
           </div>
           <div className="masthead__actions">
             <button
-              className="iconround iconround--wa"
+              className="iconround"
               onClick={openShare}
               disabled={!sim.result}
-              aria-label="Bagikan simulasi ke WhatsApp"
-              title="Bagikan ke WhatsApp"
+              aria-label="Bagikan simulasi"
+              title="Bagikan simulasi"
             >
-              <span className="i-whatsapp" aria-hidden />
+              <span className="i-share" aria-hidden />
             </button>
             <button
               className="iconround"
@@ -197,16 +197,14 @@ export default function App() {
           </div>
         </div>
         <h1 className="masthead__title">
-          <span className="badge-pct" aria-hidden>%</span>
           Hitung Untung KPR <span className="hl">Take Over</span> Anda
-          <span className="i-home masthead__home" aria-hidden />
         </h1>
         <p className="masthead__sub">Kalkulator take over KPR gratis — bandingkan biaya, lihat hematnya secara instan.</p>
       </header>
 
       <main className="wrap">
         <div className="maincard">
-          <div className="maincard__head">Kalkulator KPR Take Over — hasil instan</div>
+          <div className="maincard__head">Kalkulator KPR Take Over</div>
           <div className="maincard__body">
             <InputScreen
               kpr1={sim.kpr1}
