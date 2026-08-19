@@ -1,4 +1,4 @@
-# Weltown KPR Calculator
+# Pindah KPR Calculator
 
 Aplikasi (PWA — web + mobile) untuk menghitung dan membandingkan biaya **KPR tanpa take over vs dengan take over**. Tampilan gaya kalkulator yang bersih, bekerja offline, dan dapat di-install di HP.
 

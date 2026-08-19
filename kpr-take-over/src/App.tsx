@@ -67,7 +67,7 @@ export default function App() {
     return (
       `Simulasi KPR Take Over — ${r.hemat ? 'hemat' : 'selisih'} ${formatRingkas(Math.abs(r.selisih))} ` +
       `(${formatPersenLabel(Math.abs(r.selisihPersen))}). Tanpa take over ${formatRingkas(r.totalTanpaTakeOver)} ` +
-      `vs dengan take over ${formatRingkas(r.totalDenganTakeOver)}. Dihitung dengan Weltown KPR Calculator.`
+      `vs dengan take over ${formatRingkas(r.totalDenganTakeOver)}. Dihitung dengan Pindah KPR Calculator.`
     );
   };
 
@@ -176,7 +176,7 @@ export default function App() {
         <div className="masthead__bar">
           <div className="logo">
             <Logo size={32} />
-            <span className="logo__name">Weltown KPR Calculator</span>
+            <span className="logo__name">Pindah KPR Calculator</span>
           </div>
           <div className="masthead__actions">
             <button
@@ -202,7 +202,7 @@ export default function App() {
           </div>
         </div>
         <h1 className="masthead__title">
-          <span className="hl">Weltown</span> KPR Calculator
+          Hitung Simulasi Cicilan <span className="hl">Take Over</span> mu!
         </h1>
         <p className="masthead__sub">Kalkulator take over KPR gratis — bandingkan biaya, lihat hematnya secara instan.</p>
       </header>

@@ -81,7 +81,7 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
           <Logo size={40} />
           <div>
-            <div style={{ fontWeight: 700, fontSize: 20, color: C.ink, letterSpacing: '-0.01em' }}>Weltown KPR Calculator</div>
+            <div style={{ fontWeight: 700, fontSize: 20, color: C.ink, letterSpacing: '-0.01em' }}>Pindah KPR Calculator</div>
             <div style={{ fontSize: 13, color: C.muted }}>Simulasi KPR Take Over{jumlahTahap > 1 ? ' (2x)' : ''}</div>
           </div>
         </div>
@@ -154,7 +154,7 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(
         </div>
 
         <div style={{ marginTop: 14, textAlign: 'center', fontSize: 12, color: C.faint }}>
-          Dihitung dengan Weltown KPR Calculator · skema anuitas fix-lalu-floating
+          Dihitung dengan Pindah KPR Calculator · skema anuitas fix-lalu-floating
         </div>
       </div>
     );

@@ -11,7 +11,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: "Weltown KPR Calculator",
+        name: "Pindah KPR Calculator",
         short_name: 'KPR Calculator',
         description: 'Bandingkan biaya KPR tanpa take over vs dengan take over.',
         theme_color: '#c9a227',
