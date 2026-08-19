@@ -9,6 +9,11 @@ interface Props {
   patchKpr1: (p: Partial<KprInput>) => void;
   patchTakeOver: (p: Partial<TakeOverInput>) => void;
   setTakeOverBulan: (v: number) => void;
+  /** true bila tenor Bank 2 sudah diubah manual, jadi tidak lagi mengikuti sisa tenor KPR 1. */
+  tenorBaruManual: boolean;
+  /** Sisa tenor KPR 1 setelah take over — nilai bawaan untuk tenor Bank 2. */
+  tenorBaruDefault: number;
+  resetTenorBaru: () => void;
   pokokPindah?: number;
   totalTanpaTakeOver?: number;
 }
@@ -17,7 +22,19 @@ const TENOR_PRESETS = [60, 120, 180, 240, 300, 360];
 const FIX_PRESETS = [12, 24, 36, 48, 60, 84, 120];
 
 export function InputScreen(props: Props) {
-  const { kpr1, takeOver, takeOverBulan, patchKpr1, patchTakeOver, setTakeOverBulan, pokokPindah, totalTanpaTakeOver } = props;
+  const {
+    kpr1,
+    takeOver,
+    takeOverBulan,
+    patchKpr1,
+    patchTakeOver,
+    setTakeOverBulan,
+    tenorBaruManual,
+    tenorBaruDefault,
+    resetTenorBaru,
+    pokokPindah,
+    totalTanpaTakeOver,
+  } = props;
 
   return (
     <div className="panel-input">
@@ -75,7 +92,22 @@ export function InputScreen(props: Props) {
         </div>
 
         <div className="grid2">
-          <MonthField label="Tenor baru" info="Jangka waktu KPR baru (dalam bulan)." value={takeOver.tenorBulan} onChange={(v) => patchTakeOver({ tenorBulan: v })} presets={TENOR_PRESETS} />
+          <MonthField
+            label="Tenor baru"
+            info="Bawaannya mengikuti sisa tenor KPR 1 setelah take over (tenor KPR 1 − bulan take over). Bisa diubah manual bila Bank 2 menawarkan tenor berbeda."
+            value={takeOver.tenorBulan}
+            onChange={(v) => patchTakeOver({ tenorBulan: v })}
+            presets={TENOR_PRESETS}
+            hintExtra={
+              tenorBaruManual ? (
+                <button type="button" className="hint-reset" onClick={resetTenorBaru}>
+                  pakai sisa tenor ({tenorBaruDefault} bln)
+                </button>
+              ) : (
+                <span className="hint-auto">otomatis · sisa tenor KPR 1</span>
+              )
+            }
+          />
           <MonthField label="Masa fix baru" info="Masa bunga fix KPR baru (dalam bulan)." value={takeOver.masaFixBulan} onChange={(v) => patchTakeOver({ masaFixBulan: v })} presets={FIX_PRESETS} />
         </div>
         <div className="grid2">

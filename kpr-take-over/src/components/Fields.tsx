@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { formatAngka, parseAngka, formatPersen, parsePersen, tahunDariBulan } from '../lib/format';
 
 function Info({ text }: { text?: string }) {
@@ -85,10 +86,12 @@ interface MonthProps {
   onChange: (v: number) => void;
   info?: string;
   presets?: number[];
+  /** Keterangan tambahan di bawah input, mis. penanda nilai otomatis. */
+  hintExtra?: ReactNode;
 }
 
 /** Input jangka waktu dalam bulan: ketik manual + dropdown ringkas, dengan keterangan tahun. */
-export function MonthField({ label, value, onChange, info, presets }: MonthProps) {
+export function MonthField({ label, value, onChange, info, presets, hintExtra }: MonthProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -129,7 +132,10 @@ export function MonthField({ label, value, onChange, info, presets }: MonthProps
           </button>
         )}
       </span>
-      <span className="field__hint">{value > 0 ? `${tahunDariBulan(value)} tahun` : 'isi jumlah bulan'}</span>
+      <span className="field__hint">
+        {value > 0 ? `${tahunDariBulan(value)} tahun` : 'isi jumlah bulan'}
+        {hintExtra}
+      </span>
       {open && presets && (
         <div className="monthfield__menu" role="menu">
           {presets.map((m) => (

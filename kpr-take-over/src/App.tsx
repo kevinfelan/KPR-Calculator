@@ -197,7 +197,7 @@ export default function App() {
           </div>
         </div>
         <h1 className="masthead__title">
-          Hitung Untung KPR <span className="hl">Take Over</span> Anda
+          <span className="hl">Weltown</span> KPR Calculator
         </h1>
         <p className="masthead__sub">Kalkulator take over KPR gratis — bandingkan biaya, lihat hematnya secara instan.</p>
       </header>
@@ -213,6 +213,9 @@ export default function App() {
               patchKpr1={sim.patchKpr1}
               patchTakeOver={sim.patchTakeOver}
               setTakeOverBulan={sim.setTakeOverBulan}
+              tenorBaruManual={sim.tenorBaruManual}
+              tenorBaruDefault={sim.tenorBaruDefault}
+              resetTenorBaru={sim.resetTenorBaru}
               pokokPindah={sim.result?.pokokPindah}
               totalTanpaTakeOver={sim.result?.totalTanpaTakeOver}
             />

@@ -23,13 +23,40 @@ export const DEFAULT_TAKEOVER: TakeOverInput = {
 
 export const DEFAULT_TAKEOVER_BULAN = 60;
 
+/** Tenor baru bawaan = sisa tenor KPR 1 setelah take over. */
+export function sisaTenorSetelahTakeOver(tenorKpr1: number, takeOverBulan: number): number {
+  return Math.max(tenorKpr1 - takeOverBulan, 0);
+}
+
 export function useSimulation() {
   const [kpr1, setKpr1] = useState<KprInput>(DEFAULT_KPR1);
-  const [takeOver, setTakeOver] = useState<TakeOverInput>(DEFAULT_TAKEOVER);
+  const [takeOver, setTakeOverState] = useState<TakeOverInput>(DEFAULT_TAKEOVER);
   const [takeOverBulan, setTakeOverBulan] = useState<number>(DEFAULT_TAKEOVER_BULAN);
+  // Selama false, tenor Bank 2 mengikuti sisa tenor KPR 1 secara otomatis.
+  const [tenorBaruManual, setTenorBaruManual] = useState(false);
+
+  const tenorBaruDefault = sisaTenorSetelahTakeOver(kpr1.tenorBulan, takeOverBulan);
+
+  const takeOverEfektif = useMemo<TakeOverInput>(
+    () => ({ ...takeOver, tenorBulan: tenorBaruManual ? takeOver.tenorBulan : tenorBaruDefault }),
+    [takeOver, tenorBaruManual, tenorBaruDefault],
+  );
 
   const patchKpr1 = (patch: Partial<KprInput>) => setKpr1((s) => ({ ...s, ...patch }));
-  const patchTakeOver = (patch: Partial<TakeOverInput>) => setTakeOver((s) => ({ ...s, ...patch }));
+
+  const patchTakeOver = (patch: Partial<TakeOverInput>) => {
+    if ('tenorBulan' in patch) setTenorBaruManual(true);
+    setTakeOverState((s) => ({ ...s, ...patch }));
+  };
+
+  /** Ganti seluruh input Bank 2 (mis. saat membuka simulasi tersimpan) — tenornya dianggap manual. */
+  const setTakeOver = (v: TakeOverInput) => {
+    setTenorBaruManual(true);
+    setTakeOverState(v);
+  };
+
+  /** Kembalikan tenor baru ke sisa tenor KPR 1. */
+  const resetTenorBaru = () => setTenorBaruManual(false);
 
   const valid =
     kpr1.pokok > 0 &&
@@ -38,24 +65,27 @@ export function useSimulation() {
     kpr1.masaFixBulan <= kpr1.tenorBulan &&
     takeOverBulan >= 1 &&
     takeOverBulan <= kpr1.tenorBulan &&
-    takeOver.tenorBulan > 0 &&
-    takeOver.masaFixBulan >= 0 &&
-    takeOver.masaFixBulan <= takeOver.tenorBulan;
+    takeOverEfektif.tenorBulan > 0 &&
+    takeOverEfektif.masaFixBulan >= 0 &&
+    takeOverEfektif.masaFixBulan <= takeOverEfektif.tenorBulan;
 
   const result = useMemo(
-    () => (valid ? buildComparison(kpr1, takeOver, takeOverBulan) : null),
-    [kpr1, takeOver, takeOverBulan, valid],
+    () => (valid ? buildComparison(kpr1, takeOverEfektif, takeOverBulan) : null),
+    [kpr1, takeOverEfektif, takeOverBulan, valid],
   );
 
   return {
     kpr1,
-    takeOver,
+    takeOver: takeOverEfektif,
     takeOverBulan,
+    tenorBaruManual,
+    tenorBaruDefault,
     setKpr1,
     setTakeOver,
     setTakeOverBulan,
     patchKpr1,
     patchTakeOver,
+    resetTenorBaru,
     valid,
     result,
   };
