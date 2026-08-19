@@ -1,61 +1,64 @@
-/* Palet Weltown: emas dari logo + hitam hangat sebagai dasar. */
+/* Palet Weltown: emas dari logo, dengan permukaan hangat yang dijaga tetap terang.
+   Dua permukaan gelap yang tersisa dipakai sengaja sebagai sorotan: panel hasil
+   (--ink-deep) dan pita judul kartu. */
 :root {
-  --page: #f7f5ef;
+  --page: #f9f7f2;
   --ink: #191510;
   --text: #2c2720;
   --muted: #6e6656;
   --faint: #756d5d;
 
   --surface: #ffffff;
-  --surface-2: #f7f3e9;
-  --line: #e9e2d2;
+  --surface-2: #f6f3ec;
+  --line: #e6e1d3;
 
   /* emas untuk aksen: ikon, hover, border fokus, teks sorotan di latar terang */
   --gold: #8a6a12;
   --accent: #8a6a12;
   --gold-ink: #6b5008;
-  --gold-soft: #f6ebd2;
-  --gold-strip: #f7f0de;
+  --gold-soft: #f6efdd;
+  --gold-strip: #f2eddf;
   /* emas terang: dipakai di atas permukaan gelap */
-  --gold-light: #ebcb79;
-  /* hitam hangat: bingkai kartu utama & panel hasil */
-  --frame: #16120b;
-  --ink-deep: #231c0e;
+  --gold-light: #eecf7c;
+  /* bingkai kartu utama & panel hasil */
+  --frame: #ebe5d5;
+  --ink-deep: #2b261d;
 
   --amber: #f0b93f;
   --amber-dark: #d69f24;
   --amber-ink: #3c2c05;
 
-  --bad: #d0453b;
-  --bad-bg: #fbe6e3;
+  --bad: #c0432f;
+  --bad-bg: #fbe7e1;
 
   --radius: 14px;
   --radius-sm: 10px;
   --radius-lg: 22px;
-  --shadow: 0 1px 2px rgba(40, 32, 10, 0.05), 0 10px 30px rgba(40, 32, 10, 0.08);
-  --shadow-card: 0 6px 26px rgba(35, 27, 8, 0.2);
+  --shadow: 0 1px 2px rgba(60, 48, 16, 0.05), 0 10px 30px rgba(60, 48, 16, 0.09);
+  --shadow-card: 0 6px 26px rgba(60, 48, 16, 0.16);
   --font: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
 }
 
 :root[data-theme='dark'] {
-    --page: #100e09;
-    --ink: #f3eee2;
-    --text: #e4ddcc;
-    --muted: #9b9382;
-    --faint: #8b8371;
-    --surface: #1a1710;
-    --surface-2: #221e15;
-    --line: #322c20;
-    --gold: #dfbb60;
-    --accent: #e7c670;
-    --gold-ink: #f0dca6;
-    --gold-soft: #2a2317;
-    --gold-strip: #1b1710;
-    --frame: #14110a;
-    --ink-deep: #201a0e;
-    --bad: #f87171;
-    --bad-bg: #3a1c1b;
-    --shadow-card: 0 6px 26px rgba(0, 0, 0, 0.5);
+    --page: #14130f;
+    --ink: #f6f3ec;
+    --text: #e6e1d6;
+    --muted: #a49d8e;
+    --faint: #948c78;
+    --surface: #211e18;
+    --surface-2: #2b2720;
+    --line: #3b362d;
+    --gold: #e6c069;
+    --accent: #eccf7d;
+    --gold-ink: #f2e2b4;
+    --gold-soft: #332c1e;
+    --gold-strip: #221f18;
+    --frame: #1a1813;
+    --ink-deep: #131210;
+    --bad: #f0857a;
+    --bad-bg: #40211c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.35);
+    --shadow-card: 0 6px 26px rgba(0, 0, 0, 0.45);
 }
 
 * { box-sizing: border-box; }
@@ -148,7 +151,7 @@ button { font-family: inherit; }
 /* ------------------------------ trust bar ------------------------------- */
 .trust { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--gold-strip); padding: 12px 10px; }
 .trust__item { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--gold-ink); text-align: center; }
-.trust__item + .trust__item { border-left: 1px solid rgba(70, 52, 10, 0.16); }
+.trust__item + .trust__item { border-left: 1px solid rgba(70, 52, 10, 0.14); }
 .trust__item [class^='i-'] { color: var(--gold); font-size: 17px; }
 :root[data-theme='dark'] .trust__item { color: var(--gold-light); }
 
@@ -237,7 +240,7 @@ button { font-family: inherit; }
 .pokok-pindah { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 10px; background: var(--gold-soft); border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 12px; }
 .pokok-pindah span { font-size: 12px; color: var(--gold-ink); }
 .pokok-pindah strong { font-size: 16px; color: var(--gold-ink); font-variant-numeric: tabular-nums; }
-.pokok-pindah em { grid-column: 1 / -1; font-style: normal; font-size: 11px; color: var(--gold-ink); opacity: 0.82; }
+.pokok-pindah em { grid-column: 1 / -1; font-style: normal; font-size: 11px; color: var(--gold-ink); opacity: 0.92; }
 .pokok-pindah--baseline { margin-top: 18px; background: var(--surface-2); border: 1px solid var(--line); }
 .pokok-pindah--baseline span { color: var(--muted); }
 .pokok-pindah--baseline strong { color: var(--ink); }
@@ -257,7 +260,7 @@ button { font-family: inherit; }
 .preset__del:hover { color: var(--bad); }
 
 /* ----------------------------- result panel ----------------------------- */
-.panel-result { background: var(--ink-deep); border: 1px solid rgba(235, 203, 121, 0.22); border-radius: 16px; padding: 22px 20px; color: #fff; display: flex; flex-direction: column; text-align: center; height: 100%; }
+.panel-result { background: var(--ink-deep); border: 1px solid rgba(238, 207, 124, 0.28); border-radius: 16px; padding: 22px 20px; color: #fff; display: flex; flex-direction: column; text-align: center; height: 100%; }
 .panel-result--bad { background: #3b2318; }
 .panel-result--empty { align-items: center; justify-content: center; color: rgba(255,255,255,0.85); font-size: 14px; min-height: 260px; }
 .pr__cap { font-size: 14px; color: var(--gold-light); }
@@ -452,7 +455,7 @@ button { font-family: inherit; }
 
   .trust { padding: 11px 6px; }
   .trust__item { flex-direction: column; gap: 4px; font-size: 11.5px; line-height: 1.25; }
-  .trust__item + .trust__item { border-left-color: rgba(70, 52, 10, 0.14); }
+  .trust__item + .trust__item { border-left-color: rgba(70, 52, 10, 0.12); }
 
   .cta-row { margin: 16px 0 4px; }
   .cta { width: 100%; justify-content: center; padding: 15px 20px; }
