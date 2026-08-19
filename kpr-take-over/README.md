@@ -1,5 +1,7 @@
 # Pindah KPR Calculator
 
+**Live: https://pindah-kpr.vercel.app**
+
 Aplikasi (PWA — web + mobile) untuk menghitung dan membandingkan biaya **KPR tanpa take over vs dengan take over**. Tampilan gaya kalkulator yang bersih, bekerja offline, dan dapat di-install di HP.
 
 Mesin hitung mereplikasi persis file `Perhitungan KPR Take Over.xlsx` (skema anuitas *fix-lalu-floating*) dan diverifikasi lewat unit test.
@@ -63,4 +65,4 @@ npm run preview    # pratinjau hasil build
 
 ## Deploy
 
-Aplikasi 100% frontend, cocok untuk Vercel/Netlify. Jika di-deploy dari repo ini yang berisi subfolder, set **Root Directory = `kpr-take-over`**. Framework terdeteksi otomatis sebagai **Vite** (build `npm run build`, output `dist`). Tidak perlu environment variable.
+Live di **https://pindah-kpr.vercel.app** (Vercel). Aplikasi 100% frontend, cocok untuk Vercel/Netlify. Jika di-deploy dari repo ini yang berisi subfolder, set **Root Directory = `kpr-take-over`**. Framework terdeteksi otomatis sebagai **Vite** (build `npm run build`, output `dist`). Tidak perlu environment variable.
