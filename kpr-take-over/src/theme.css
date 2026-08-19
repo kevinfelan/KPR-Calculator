@@ -137,8 +137,9 @@ button { font-family: inherit; }
   background: var(--frame); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card);
 }
 .maincard__head {
-  color: #f7eeda; text-align: center; font-weight: 600; font-size: 16px; padding: 15px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(135deg, #f2dfa0 0%, #dcb84e 42%, #bd9522 100%);
+  color: #1a150c; text-align: center; font-weight: 700; font-size: 16px; padding: 15px 20px;
+  border-bottom: 1px solid rgba(20, 17, 10, 0.2);
 }
 .maincard__body { display: grid; grid-template-columns: 1fr; gap: 14px; padding: 14px; }
 @media (min-width: 860px) { .maincard__body { grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; } }
