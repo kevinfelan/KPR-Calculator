@@ -11,10 +11,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: "Kev's KPR Calculator",
+        name: "Weltown KPR Calculator",
         short_name: 'KPR Calculator',
         description: 'Bandingkan biaya KPR tanpa take over vs dengan take over.',
-        theme_color: '#0d9488',
+        theme_color: '#c9a227',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',

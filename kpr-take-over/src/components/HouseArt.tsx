@@ -6,8 +6,8 @@ export function HouseArt({ className }: { className?: string }) {
       </defs>
       <g clipPath="url(#ha-round)">
         {/* backdrop */}
-        <circle cx="160" cy="120" r="118" fill="#3f9e86" opacity="0.5" />
-        <circle cx="160" cy="205" r="150" fill="#2f8570" opacity="0.55" />
+        <circle cx="160" cy="120" r="118" fill="#7c6722" opacity="0.5" />
+        <circle cx="160" cy="205" r="150" fill="#5c4a16" opacity="0.55" />
 
         {/* sun + clouds */}
         <circle cx="54" cy="44" r="15" fill="#f6c25b" />
@@ -23,9 +23,9 @@ export function HouseArt({ className }: { className?: string }) {
         {/* left trees */}
         <g>
           <rect x="30" y="128" width="7" height="34" rx="2" fill="#7a5a3a" />
-          <circle cx="33.5" cy="118" r="20" fill="#2f8570" />
-          <circle cx="24" cy="128" r="14" fill="#347d68" />
-          <circle cx="44" cy="128" r="14" fill="#347d68" />
+          <circle cx="33.5" cy="118" r="20" fill="#5c4a16" />
+          <circle cx="24" cy="128" r="14" fill="#66531b" />
+          <circle cx="44" cy="128" r="14" fill="#66531b" />
         </g>
 
         {/* garage wing */}
@@ -64,17 +64,17 @@ export function HouseArt({ className }: { className?: string }) {
             <rect x="122" y="112" width="22" height="22" rx="2" fill="#f6c25b" />
             <line x1="133" y1="112" x2="133" y2="134" stroke="#c99a3f" strokeWidth="1.6" />
             <line x1="122" y1="123" x2="144" y2="123" stroke="#c99a3f" strokeWidth="1.6" />
-            <rect x="116" y="112" width="4" height="22" fill="#5b8f7d" />
-            <rect x="146" y="112" width="4" height="22" fill="#5b8f7d" />
-            <rect x="120" y="134" width="26" height="5" rx="1.5" fill="#3a8f78" />
+            <rect x="116" y="112" width="4" height="22" fill="#806d2d" />
+            <rect x="146" y="112" width="4" height="22" fill="#806d2d" />
+            <rect x="120" y="134" width="26" height="5" rx="1.5" fill="#6f5c1f" />
           </g>
           <g>
             <rect x="172" y="112" width="22" height="22" rx="2" fill="#f6c25b" />
             <line x1="183" y1="112" x2="183" y2="134" stroke="#c99a3f" strokeWidth="1.6" />
             <line x1="172" y1="123" x2="194" y2="123" stroke="#c99a3f" strokeWidth="1.6" />
-            <rect x="166" y="112" width="4" height="22" fill="#5b8f7d" />
-            <rect x="196" y="112" width="4" height="22" fill="#5b8f7d" />
-            <rect x="170" y="134" width="26" height="5" rx="1.5" fill="#3a8f78" />
+            <rect x="166" y="112" width="4" height="22" fill="#806d2d" />
+            <rect x="196" y="112" width="4" height="22" fill="#806d2d" />
+            <rect x="170" y="134" width="26" height="5" rx="1.5" fill="#6f5c1f" />
           </g>
           {/* door + steps */}
           <rect x="148" y="136" width="20" height="28" rx="2" fill="#2b3648" />
@@ -84,7 +84,7 @@ export function HouseArt({ className }: { className?: string }) {
         </g>
 
         {/* right bush */}
-        <g fill="#347d68">
+        <g fill="#66531b">
           <circle cx="272" cy="156" r="13" />
           <circle cx="286" cy="158" r="10" />
           <circle cx="260" cy="159" r="9" />
@@ -104,8 +104,8 @@ export function HouseArt({ className }: { className?: string }) {
         </g>
 
         {/* grass foreground */}
-        <rect x="0" y="182" width="320" height="18" fill="#3a8f78" />
-        <g stroke="#2f8570" strokeWidth="2" strokeLinecap="round">
+        <rect x="0" y="182" width="320" height="18" fill="#6f5c1f" />
+        <g stroke="#5c4a16" strokeWidth="2" strokeLinecap="round">
           <path d="M40 182v-6M48 182v-8M56 182v-5M300 182v-7M292 182v-5" />
         </g>
       </g>

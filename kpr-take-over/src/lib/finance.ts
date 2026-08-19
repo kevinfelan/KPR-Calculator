@@ -3,6 +3,7 @@ import type {
   AmortRow,
   ComparisonResult,
   KprInput,
+  TahapTakeOver,
   TakeOverInput,
 } from './types';
 
@@ -68,55 +69,101 @@ export function amortize(input: KprInput): AmortResult {
   };
 }
 
+/** Satu tahap take over yang diminta pengguna: bulan pindah + syarat KPR barunya. */
+export interface TakeOverTahapInput {
+  /** Bulan take over, dihitung dari awal KPR yang sedang berjalan. */
+  bulan: number;
+  input: TakeOverInput;
+}
+
 /**
  * Bangun perbandingan lengkap: KPR tanpa take over vs dengan take over.
  * `takeOverBulan` = bulan saat pindah bank (default: akhir masa fix KPR 1).
+ * `tahapLanjutan` = take over berikutnya (mis. take over ke-2), dihitung dengan
+ * rumus yang sama tapi berbasis sisa pokok & sisa tenor KPR sebelumnya.
  * Meniru sheet "Simulasi Take Over" pada Excel.
  */
 export function buildComparison(
   kpr1Input: KprInput,
   takeOver: TakeOverInput,
   takeOverBulan: number = kpr1Input.masaFixBulan,
+  tahapLanjutan: TakeOverTahapInput[] = [],
 ): ComparisonResult {
   const kpr1 = amortize(kpr1Input);
-  const n1 = kpr1.rows.length;
 
-  // Batasi bulan take over ke rentang jadwal KPR 1.
-  const toBulan = Math.min(Math.max(Math.round(takeOverBulan), 1), n1);
+  const antrian: TakeOverTahapInput[] = [{ bulan: takeOverBulan, input: takeOver }, ...tahapLanjutan];
 
-  // Sisa pokok & total bunga KPR 1 pada saat take over (bulan ke-toBulan).
-  const pokokPindah = kpr1.rows[toBulan - 1].saldo;
-  let bungaKpr1 = 0;
-  for (let i = 0; i < toBulan; i++) bungaKpr1 += kpr1.rows[i].bunga;
+  const tahap: TahapTakeOver[] = [];
+  const kprList: AmortResult[] = [kpr1];
+  const bungaPerKpr: number[] = [];
 
-  const kpr2 = amortize({
-    pokok: pokokPindah,
-    tenorBulan: takeOver.tenorBulan,
-    masaFixBulan: takeOver.masaFixBulan,
-    bungaFix: takeOver.bungaFix,
-    bungaFloating: takeOver.bungaFloating,
+  let berjalan = kpr1;
+  let bulanGlobal = 0;
+  let biayaTotal = 0;
+
+  antrian.forEach((t, i) => {
+    const n = berjalan.rows.length;
+    // Batasi bulan take over ke rentang jadwal KPR yang sedang berjalan.
+    const toBulan = Math.min(Math.max(Math.round(t.bulan), 1), n);
+
+    const pokokPindah = berjalan.rows[toBulan - 1].saldo;
+    let bungaSebelum = 0;
+    for (let k = 0; k < toBulan; k++) bungaSebelum += berjalan.rows[k].bunga;
+
+    const kprBaru = amortize({
+      pokok: pokokPindah,
+      tenorBulan: t.input.tenorBulan,
+      masaFixBulan: t.input.masaFixBulan,
+      bungaFix: t.input.bungaFix,
+      bungaFloating: t.input.bungaFloating,
+    });
+
+    const provisi = pokokPindah * t.input.provisi;
+    const asuransi = pokokPindah * t.input.asuransi;
+    const penalti = pokokPindah * t.input.penalti;
+    const biaya = { provisi, asuransi, penalti, total: provisi + asuransi + penalti };
+
+    bulanGlobal += toBulan;
+    biayaTotal += biaya.total;
+
+    tahap.push({
+      urutan: i + 1,
+      bulan: toBulan,
+      bulanGlobal,
+      pokokPindah,
+      bungaSebelum,
+      biaya,
+      kpr: kprBaru,
+    });
+    kprList.push(kprBaru);
+    bungaPerKpr.push(bungaSebelum);
+
+    berjalan = kprBaru;
   });
 
-  const provisi = pokokPindah * takeOver.provisi;
-  const asuransi = pokokPindah * takeOver.asuransi;
-  const penalti = pokokPindah * takeOver.penalti;
-  const biaya = { provisi, asuransi, penalti, total: provisi + asuransi + penalti };
+  // KPR terakhir dijalankan sampai lunas, jadi seluruh bunganya ikut dibayar.
+  const kprAkhir = berjalan;
+  bungaPerKpr.push(kprAkhir.totalBunga);
 
-  const bungaKpr2 = kpr2.totalBunga;
-
+  const tahap1 = tahap[0];
   const totalTanpaTakeOver = kpr1.totalBunga;
-  const totalDenganTakeOver = bungaKpr1 + bungaKpr2 + biaya.total;
+  const totalDenganTakeOver = bungaPerKpr.reduce((a, b) => a + b, 0) + biayaTotal;
   const selisih = totalTanpaTakeOver - totalDenganTakeOver;
   const selisihPersen = totalTanpaTakeOver !== 0 ? selisih / totalTanpaTakeOver : 0;
 
   return {
     kpr1,
-    kpr2,
-    pokokPindah,
-    takeOverBulan: toBulan,
-    bungaKpr1,
-    bungaKpr2,
-    biaya,
+    kpr2: tahap1.kpr,
+    tahap,
+    kprList,
+    bungaPerKpr,
+    kprAkhir,
+    pokokPindah: tahap1.pokokPindah,
+    takeOverBulan: tahap1.bulan,
+    bungaKpr1: tahap1.bungaSebelum,
+    bungaKpr2: tahap1.kpr.totalBunga,
+    biaya: tahap1.biaya,
+    biayaTotal,
     totalTanpaTakeOver,
     totalDenganTakeOver,
     selisih,

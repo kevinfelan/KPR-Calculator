@@ -16,6 +16,21 @@ interface Props {
   resetTenorBaru: () => void;
   pokokPindah?: number;
   totalTanpaTakeOver?: number;
+
+  /* --- take over ke-2 --- */
+  takeOver2: TakeOverInput;
+  takeOver2Aktif: boolean;
+  takeOverBulan2: number;
+  bulan2Manual: boolean;
+  tenorBaru2Manual: boolean;
+  tenorBaru2Default: number;
+  patchTakeOver2: (p: Partial<TakeOverInput>) => void;
+  setTakeOverBulan2: (v: number) => void;
+  aktifkanTakeOver2: () => void;
+  hapusTakeOver2: () => void;
+  resetTenorBaru2: () => void;
+  resetBulan2: () => void;
+  pokokPindah2?: number;
 }
 
 const TENOR_PRESETS = [60, 120, 180, 240, 300, 360];
@@ -34,6 +49,19 @@ export function InputScreen(props: Props) {
     resetTenorBaru,
     pokokPindah,
     totalTanpaTakeOver,
+    takeOver2,
+    takeOver2Aktif,
+    takeOverBulan2,
+    bulan2Manual,
+    tenorBaru2Manual,
+    tenorBaru2Default,
+    patchTakeOver2,
+    setTakeOverBulan2,
+    aktifkanTakeOver2,
+    hapusTakeOver2,
+    resetTenorBaru2,
+    resetBulan2,
+    pokokPindah2,
   } = props;
 
   return (
@@ -123,6 +151,81 @@ export function InputScreen(props: Props) {
         </div>
         {takeOver.masaFixBulan > takeOver.tenorBulan && <p className="warn">Masa fix tidak boleh melebihi tenor.</p>}
       </div>
+
+      {takeOver2Aktif ? (
+        <div className="section section--to2">
+          <div className="section__head">
+            <span className="section__title"><span className="i-swap" aria-hidden />Take over ke-2 · Bank 3</span>
+            <button type="button" className="linkbtn" onClick={hapusTakeOver2}>
+              Hapus
+            </button>
+          </div>
+
+          <MonthField
+            label="Take over ke-2 di bulan ke"
+            info="Dihitung dari awal KPR di Bank 2. Menentukan sisa pokok Bank 2 yang dipindah ke Bank 3 & bunga Bank 2 yang sudah dibayar."
+            value={takeOverBulan2}
+            onChange={setTakeOverBulan2}
+            presets={FIX_PRESETS}
+            hintExtra={
+              bulan2Manual ? (
+                <button type="button" className="hint-reset" onClick={resetBulan2}>
+                  pakai akhir masa fix Bank 2
+                </button>
+              ) : (
+                <span className="hint-auto">otomatis · akhir masa fix Bank 2</span>
+              )
+            }
+          />
+          {takeOverBulan2 > takeOver.tenorBulan && <p className="warn">Bulan take over ke-2 tidak boleh melebihi tenor Bank 2.</p>}
+
+          <div className="pokok-pindah">
+            <span>Pokok yang dipindah</span>
+            <strong>{pokokPindah2 ? formatRupiah(pokokPindah2) : '—'}</strong>
+            <em>otomatis dari sisa pokok Bank 2 di bulan ke-{takeOverBulan2}</em>
+          </div>
+
+          <div className="grid2">
+            <MonthField
+              label="Tenor baru"
+              info="Bawaannya mengikuti sisa tenor Bank 2 setelah take over ke-2 (tenor Bank 2 − bulan take over ke-2). Bisa diubah manual."
+              value={takeOver2.tenorBulan}
+              onChange={(v) => patchTakeOver2({ tenorBulan: v })}
+              presets={TENOR_PRESETS}
+              hintExtra={
+                tenorBaru2Manual ? (
+                  <button type="button" className="hint-reset" onClick={resetTenorBaru2}>
+                    pakai sisa tenor ({tenorBaru2Default} bln)
+                  </button>
+                ) : (
+                  <span className="hint-auto">otomatis · sisa tenor Bank 2</span>
+                )
+              }
+            />
+            <MonthField label="Masa fix baru" info="Masa bunga fix di Bank 3 (dalam bulan)." value={takeOver2.masaFixBulan} onChange={(v) => patchTakeOver2({ masaFixBulan: v })} presets={FIX_PRESETS} />
+          </div>
+          <div className="grid2">
+            <PercentField label="Bunga fix" value={takeOver2.bungaFix} onChange={(v) => patchTakeOver2({ bungaFix: v })} />
+            <PercentField label="Bunga floating" value={takeOver2.bungaFloating} onChange={(v) => patchTakeOver2({ bungaFloating: v })} />
+          </div>
+
+          <div className="subhead">Biaya take over ke-2 (% dari pokok dipindah)</div>
+          <div className="grid3">
+            <PercentField label="Provisi" value={takeOver2.provisi} onChange={(v) => patchTakeOver2({ provisi: v })} />
+            <PercentField label="Asuransi" value={takeOver2.asuransi} onChange={(v) => patchTakeOver2({ asuransi: v })} />
+            <PercentField label="Penalti" value={takeOver2.penalti} onChange={(v) => patchTakeOver2({ penalti: v })} />
+          </div>
+          {takeOver2.masaFixBulan > takeOver2.tenorBulan && <p className="warn">Masa fix tidak boleh melebihi tenor.</p>}
+        </div>
+      ) : (
+        <button type="button" className="addbtn" onClick={aktifkanTakeOver2}>
+          <span className="addbtn__plus" aria-hidden>+</span>
+          <span className="addbtn__text">
+            Tambah take over ke-2
+            <em>pindah lagi dari Bank 2 ke Bank 3 — dihitung dari sisa pokok &amp; sisa tenor Bank 2</em>
+          </span>
+        </button>
+      )}
     </div>
   );
 }

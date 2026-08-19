@@ -12,6 +12,9 @@ import { loadSims, saveSim, deleteSim, genId } from './storage/db';
 import { formatRingkas, formatPersenLabel } from './lib/format';
 import type { SavedSim } from './lib/types';
 
+// Jadwal angsuran per bulan sementara disembunyikan — set true untuk memunculkannya lagi.
+const TAMPILKAN_JADWAL_ANGSURAN = false;
+
 export default function App() {
   const sim = useSimulation();
   const [sims, setSims] = useState<SavedSim[]>([]);
@@ -64,7 +67,7 @@ export default function App() {
     return (
       `Simulasi KPR Take Over — ${r.hemat ? 'hemat' : 'selisih'} ${formatRingkas(Math.abs(r.selisih))} ` +
       `(${formatPersenLabel(Math.abs(r.selisihPersen))}). Tanpa take over ${formatRingkas(r.totalTanpaTakeOver)} ` +
-      `vs dengan take over ${formatRingkas(r.totalDenganTakeOver)}. Dihitung dengan Kev's KPR Calculator.`
+      `vs dengan take over ${formatRingkas(r.totalDenganTakeOver)}. Dihitung dengan Weltown KPR Calculator.`
     );
   };
 
@@ -139,6 +142,7 @@ export default function App() {
       kpr1: sim.kpr1,
       takeOver: sim.takeOver,
       takeOverBulan: sim.takeOverBulan,
+      ...(sim.takeOver2Aktif ? { takeOver2: sim.takeOver2, takeOverBulan2: sim.takeOverBulan2 } : {}),
       ringkas: {
         totalTanpaTakeOver: sim.result.totalTanpaTakeOver,
         totalDenganTakeOver: sim.result.totalDenganTakeOver,
@@ -156,6 +160,7 @@ export default function App() {
     sim.setKpr1(s.kpr1);
     sim.setTakeOver(s.takeOver);
     sim.setTakeOverBulan(s.takeOverBulan ?? s.kpr1.masaFixBulan);
+    sim.setTakeOver2(s.takeOver2, s.takeOverBulan2);
     setDrawer(false);
     scrollToResult();
   };
@@ -171,7 +176,7 @@ export default function App() {
         <div className="masthead__bar">
           <div className="logo">
             <Logo size={32} />
-            <span className="logo__name">Kev's KPR Calculator</span>
+            <span className="logo__name">Weltown KPR Calculator</span>
           </div>
           <div className="masthead__actions">
             <button
@@ -218,6 +223,19 @@ export default function App() {
               resetTenorBaru={sim.resetTenorBaru}
               pokokPindah={sim.result?.pokokPindah}
               totalTanpaTakeOver={sim.result?.totalTanpaTakeOver}
+              takeOver2={sim.takeOver2}
+              takeOver2Aktif={sim.takeOver2Aktif}
+              takeOverBulan2={sim.takeOverBulan2}
+              bulan2Manual={sim.bulan2Manual}
+              tenorBaru2Manual={sim.tenorBaru2Manual}
+              tenorBaru2Default={sim.tenorBaru2Default}
+              patchTakeOver2={sim.patchTakeOver2}
+              setTakeOverBulan2={sim.setTakeOverBulan2}
+              aktifkanTakeOver2={sim.aktifkanTakeOver2}
+              hapusTakeOver2={sim.hapusTakeOver2}
+              resetTenorBaru2={sim.resetTenorBaru2}
+              resetBulan2={sim.resetBulan2}
+              pokokPindah2={sim.result?.tahap[1]?.pokokPindah}
             />
             <div className="maincard__result" ref={resultRef}>
               {sim.result ? (
@@ -242,7 +260,7 @@ export default function App() {
           </button>
         </div>
 
-        {sim.result && <ResultDetails result={sim.result} />}
+        {TAMPILKAN_JADWAL_ANGSURAN && sim.result && <ResultDetails result={sim.result} />}
 
         <footer className="foot">Data tersimpan lokal di perangkat ini · dihitung sesuai skema anuitas fix-lalu-floating</footer>
       </main>
@@ -286,7 +304,15 @@ export default function App() {
 
       {/* Kartu sumber screenshot: off-screen tapi tetap opaque agar html2canvas bisa merender */}
       <div aria-hidden style={{ position: 'fixed', left: -10000, top: 0, width: 720, pointerEvents: 'none' }}>
-        {sim.result && <ShareCard ref={shareRef} result={sim.result} kpr1={sim.kpr1} takeOver={sim.takeOver} takeOverBulan={sim.takeOverBulan} />}
+        {sim.result && <ShareCard
+            ref={shareRef}
+            result={sim.result}
+            kpr1={sim.kpr1}
+            takeOver={sim.takeOver}
+            takeOverBulan={sim.takeOverBulan}
+            takeOver2={sim.takeOver2Aktif ? sim.takeOver2 : undefined}
+            takeOverBulan2={sim.takeOver2Aktif ? sim.takeOverBulan2 : undefined}
+          />}
       </div>
     </div>
   );

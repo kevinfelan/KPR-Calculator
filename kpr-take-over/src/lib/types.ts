@@ -46,11 +46,38 @@ export interface BiayaTakeOver {
   total: number;
 }
 
+/** Satu tahap take over: pindah dari KPR yang sedang berjalan ke KPR baru. */
+export interface TahapTakeOver {
+  /** 1 = take over pertama, 2 = take over kedua, dst. */
+  urutan: number;
+  /** Bulan take over, dihitung dari awal KPR yang sedang berjalan. */
+  bulan: number;
+  /** Bulan take over dihitung dari awal KPR 1. */
+  bulanGlobal: number;
+  /** Sisa pokok KPR sebelumnya yang dipindah ke KPR baru. */
+  pokokPindah: number;
+  /** Bunga yang sudah dibayar di KPR sebelumnya sampai bulan take over ini. */
+  bungaSebelum: number;
+  biaya: BiayaTakeOver;
+  /** Amortisasi KPR baru hasil take over ini. */
+  kpr: AmortResult;
+}
+
 export interface ComparisonResult {
   /** Amortisasi penuh KPR 1 (skenario tetap di bank lama) */
   kpr1: AmortResult;
-  /** Amortisasi KPR 2 (pinjaman baru setelah take over) */
+  /** Amortisasi KPR 2 (pinjaman baru setelah take over pertama) */
   kpr2: AmortResult;
+  /** Semua tahap take over (1 tahap = take over sekali, 2 tahap = take over dua kali). */
+  tahap: TahapTakeOver[];
+  /** Seluruh KPR pada rantai: [KPR 1, KPR 2, (KPR 3)]. */
+  kprList: AmortResult[];
+  /** Bunga yang benar-benar dibayar di tiap KPR pada rantai (searah kprList). */
+  bungaPerKpr: number[];
+  /** KPR terakhir pada rantai — yang dijalankan sampai lunas. */
+  kprAkhir: AmortResult;
+  /** Total biaya seluruh tahap take over. */
+  biayaTotal: number;
   pokokPindah: number;
   /** Bulan saat take over dilakukan */
   takeOverBulan: number;
@@ -85,6 +112,9 @@ export interface SavedSim {
   kpr1: KprInput;
   takeOver: TakeOverInput;
   takeOverBulan: number;
+  /** Take over kedua — hanya ada bila simulasi memakainya. */
+  takeOver2?: TakeOverInput;
+  takeOverBulan2?: number;
   ringkas: {
     totalTanpaTakeOver: number;
     totalDenganTakeOver: number;

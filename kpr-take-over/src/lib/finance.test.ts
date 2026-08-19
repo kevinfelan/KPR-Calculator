@@ -92,3 +92,69 @@ describe('buildComparison — take over di bulan berbeda', () => {
     expect(c36.pokokPindah).toBeCloseTo(c60.kpr1.rows[35].saldo, 2);
   });
 });
+
+describe('buildComparison — take over dua kali', () => {
+  const satuTahap = buildComparison(kpr1, takeOver);
+
+  // Take over ke-2 di bulan 24 KPR 2 dengan syarat identik & tanpa biaya:
+  // anuitas ulang atas sisa pokok dengan bunga yang sama menghasilkan jadwal
+  // yang sama, jadi totalnya harus tidak berubah.
+  const netral = buildComparison(kpr1, takeOver, 60, [
+    {
+      bulan: 24,
+      input: { ...takeOver, tenorBulan: 156, masaFixBulan: 36, provisi: 0, asuransi: 0, penalti: 0 },
+    },
+  ]);
+
+  it('rantai netral tidak mengubah total', () => {
+    expect(Math.abs(netral.totalDenganTakeOver - satuTahap.totalDenganTakeOver)).toBeLessThan(TOL);
+  });
+
+  it('menghasilkan 2 tahap & 3 KPR pada rantai', () => {
+    expect(netral.tahap).toHaveLength(2);
+    expect(netral.kprList).toHaveLength(3);
+    expect(netral.bungaPerKpr).toHaveLength(3);
+  });
+
+  it('pokok pindah tahap 2 = sisa pokok KPR 2 di bulan take over ke-2', () => {
+    expect(netral.tahap[1].pokokPindah).toBeCloseTo(satuTahap.kpr2.rows[23].saldo, 6);
+  });
+
+  it('bunga tahap 2 dihitung dari bunga KPR 2 sampai bulan take over', () => {
+    const bunga24 = satuTahap.kpr2.rows.slice(0, 24).reduce((a, r) => a + r.bunga, 0);
+    expect(netral.tahap[1].bungaSebelum).toBeCloseTo(bunga24, 6);
+    expect(netral.bungaPerKpr[1]).toBeCloseTo(bunga24, 6);
+  });
+
+  it('bulan global tahap 2 dihitung dari awal KPR 1', () => {
+    expect(netral.tahap[0].bulanGlobal).toBe(60);
+    expect(netral.tahap[1].bulanGlobal).toBe(84);
+  });
+
+  it('biaya tahap 2 dihitung dari pokok yang dipindah di tahap itu', () => {
+    const c = buildComparison(kpr1, takeOver, 60, [
+      { bulan: 24, input: { ...takeOver, tenorBulan: 156, masaFixBulan: 36 } },
+    ]);
+    const p = c.tahap[1].pokokPindah;
+    expect(c.tahap[1].biaya.provisi).toBeCloseTo(p * takeOver.provisi, 6);
+    expect(c.tahap[1].biaya.penalti).toBeCloseTo(p * takeOver.penalti, 6);
+    expect(c.biayaTotal).toBeCloseTo(c.tahap[0].biaya.total + c.tahap[1].biaya.total, 6);
+  });
+
+  it('bunga lebih murah di tahap 2 membuat total lebih hemat', () => {
+    const lebihMurah = buildComparison(kpr1, takeOver, 60, [
+      {
+        bulan: 24,
+        input: { ...takeOver, tenorBulan: 156, masaFixBulan: 36, bungaFix: 0.03, bungaFloating: 0.09, provisi: 0, asuransi: 0, penalti: 0 },
+      },
+    ]);
+    expect(lebihMurah.totalDenganTakeOver).toBeLessThan(satuTahap.totalDenganTakeOver);
+    expect(lebihMurah.selisih).toBeGreaterThan(satuTahap.selisih);
+  });
+
+  it('field lama tetap merujuk ke tahap pertama', () => {
+    expect(netral.pokokPindah).toBeCloseTo(satuTahap.pokokPindah, 6);
+    expect(netral.bungaKpr1).toBeCloseTo(satuTahap.bungaKpr1, 6);
+    expect(netral.kpr2.cicilanFix).toBeCloseTo(satuTahap.kpr2.cicilanFix, 6);
+  });
+});
