@@ -444,10 +444,12 @@ button { font-family: inherit; }
 
 /* ------------------------------- mobile --------------------------------- */
 @media (max-width: 600px) {
-  .masthead { padding: 16px 16px 4px; }
-  .masthead__title { font-size: clamp(26px, 8vw, 40px); }
-  .masthead__sub { font-size: 14px; }
-  .wrap { padding: 10px 12px 24px; }
+  /* kepala halaman diringkas di HP supaya panel hasil lebih cepat terlihat */
+  .masthead { padding: 12px 14px 2px; }
+  .masthead__bar { margin-bottom: 10px; }
+  .masthead__title { font-size: clamp(22px, 6.6vw, 32px); line-height: 1.06; }
+  .masthead__sub { font-size: 13px; line-height: 1.4; margin-top: 6px; }
+  .wrap { padding: 8px 12px 24px; }
   .maincard__head { font-size: 15px; padding: 13px 16px; }
   .maincard__body { padding: 12px; }
   .panel-input { padding: 14px; }
