@@ -12,41 +12,31 @@ function labelBunga(i: number, jumlahKpr: number, jumlahTahap: number): string {
   return `Bunga KPR ${i + 1} (sebelum take over${urutan})`;
 }
 
-/**
- * Sorotan cicilan — sengaja dipisah dari rincian agar bisa diletakkan paling
- * atas kartu, sehingga di layar HP langsung terlihat tanpa perlu scroll.
- */
-export function ResultHero({ result }: { result: ComparisonResult }) {
+export function ResultScreen({ result }: { result: ComparisonResult }) {
+  const hemat = result.hemat;
   const jumlahTahap = result.tahap.length;
   const cicilanAkhir = result.kprAkhir.cicilanFloating;
   const cicilanAwal = result.kpr1.cicilanFloating;
 
   return (
-    <div className="panel-hero">
-      <span className="pr__cap">Cicilan per bulan</span>
-      <span className="pr__subtitle">
-        {jumlahTahap > 1 ? 'Sebelum → setelah 2x take over' : 'Sebelum → sesudah take over'}
-      </span>
-      <CicilanCompare result={result} />
-      <div className="pr__note">
-        <span className="i-bulb" aria-hidden />
-        <span>
-          {cicilanAkhir < cicilanAwal
-            ? `Saat masuk masa floating, cicilan turun dari ${formatRingkas(cicilanAwal)} jadi ${formatRingkas(cicilanAkhir)}. `
-            : ''}
-          Biaya yang dikeluarkan hanya biaya take over saja — sering masih ada cashback asuransi dari KPR pertama.
-        </span>
-      </div>
-    </div>
-  );
-}
-
-export function ResultScreen({ result }: { result: ComparisonResult }) {
-  const hemat = result.hemat;
-  const jumlahTahap = result.tahap.length;
-
-  return (
     <div className={`panel-result ${hemat ? '' : 'panel-result--bad'}`}>
+      <div className="pr__hero">
+        <span className="pr__cap">Cicilan per bulan</span>
+        <span className="pr__subtitle">
+          {jumlahTahap > 1 ? 'Sebelum → setelah 2x take over' : 'Sebelum → sesudah take over'}
+        </span>
+        <CicilanCompare result={result} />
+        <div className="pr__note">
+          <span className="i-bulb" aria-hidden />
+          <span>
+            {cicilanAkhir < cicilanAwal
+              ? `Saat masuk masa floating, cicilan turun dari ${formatRingkas(cicilanAwal)} jadi ${formatRingkas(cicilanAkhir)}. `
+              : ''}
+            Biaya yang dikeluarkan hanya biaya take over saja — sering masih ada cashback asuransi dari KPR pertama.
+          </span>
+        </div>
+      </div>
+
       <div className="pr__rows">
         {result.bungaPerKpr.map((bunga, i) => (
           <div className="pr__row" key={i}>

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSimulation } from './state/useSimulation';
 import { Logo } from './components/Logo';
 import { InputScreen } from './components/InputScreen';
-import { ResultHero, ResultScreen } from './components/ResultScreen';
+import { ResultScreen } from './components/ResultScreen';
 import { ResultDetails } from './components/ResultDetails';
 import { HistoryTable } from './components/HistoryTable';
 import { SaveDialog } from './components/SaveDialog';
@@ -210,11 +210,6 @@ export default function App() {
       <main className="wrap">
         <div className="maincard">
           <div className="maincard__head">Kalkulator KPR Take Over</div>
-          {sim.result && (
-            <div className="maincard__hero">
-              <ResultHero result={sim.result} />
-            </div>
-          )}
           <div className="maincard__body">
             <InputScreen
               kpr1={sim.kpr1}
