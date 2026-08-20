@@ -13,8 +13,9 @@ import { ResultDetails } from './components/ResultDetails';
 import { HistoryTable } from './components/HistoryTable';
 import { SaveDialog } from './components/SaveDialog';
 import { ShareCard } from './components/ShareCard';
+import { ShareCardBerjenjang } from './components/ShareCardBerjenjang';
 import { ShareModal } from './components/ShareModal';
-import { loadSims, saveSim, deleteSim, genId } from './storage/db';
+import { loadSims, saveSim, deleteSim, genId, simBerjenjang } from './storage/db';
 import { formatRingkas, formatPersenLabel } from './lib/format';
 import type { SavedSim } from './lib/types';
 import { TAMPILKAN_JADWAL_ANGSURAN } from './tampilan';
@@ -23,6 +24,7 @@ export default function App() {
   const sim = useSimulation();
   const bj = useBerjenjang();
   const [mode, setMode] = useState<'takeover' | 'berjenjang'>('takeover');
+  const adaHasil = mode === 'takeover' ? !!sim.result : !!bj.hasil;
   const [sims, setSims] = useState<SavedSim[]>([]);
   const [drawer, setDrawer] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
@@ -68,12 +70,22 @@ export default function App() {
   const scrollToResult = () => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   const shareTeks = () => {
+    if (mode === 'berjenjang') {
+      const h = bj.hasil;
+      if (!h) return '';
+      return (
+        `Simulasi KPR Berjenjang — cicilan ${formatRingkas(h.cicilanAwal)} di jenjang awal lalu ` +
+        `${formatRingkas(h.cicilanAkhir)} di akhir. Total bunga ${formatRingkas(h.totalBunga)}. ` +
+        `Dihitung dengan Pindah KPR Calculator.`
+      );
+    }
     const r = sim.result;
     if (!r) return '';
     return (
-      `Simulasi KPR Take Over — ${r.hemat ? 'hemat' : 'selisih'} ${formatRingkas(Math.abs(r.selisih))} ` +
-      `(${formatPersenLabel(Math.abs(r.selisihPersen))}). Tanpa take over ${formatRingkas(r.totalTanpaTakeOver)} ` +
-      `vs dengan take over ${formatRingkas(r.totalDenganTakeOver)}. Dihitung dengan Pindah KPR Calculator.`
+      `Simulasi KPR Take Over — cicilan masa floating ${formatRingkas(r.kpr1.cicilanFloating)} jadi ` +
+      `${formatRingkas(r.kprAkhir.cicilanFloating)} per bulan. ${r.hemat ? 'Hemat' : 'Selisih'} bunga ` +
+      `${formatRingkas(Math.abs(r.selisih))} (${formatPersenLabel(Math.abs(r.selisihPersen))}). ` +
+      `Dihitung dengan Pindah KPR Calculator.`
     );
   };
 
@@ -102,7 +114,7 @@ export default function App() {
   };
 
   const openShare = () => {
-    if (sim.result) buatGambar();
+    if (adaHasil) buatGambar();
   };
 
   const closeShare = () =>
@@ -140,22 +152,41 @@ export default function App() {
   };
 
   const handleSave = (nama: string) => {
-    if (!sim.result) return;
-    const saved: SavedSim = {
-      id: genId(),
-      nama,
-      dibuat: Date.now(),
-      kpr1: sim.kpr1,
-      takeOver: sim.takeOver,
-      takeOverBulan: sim.takeOverBulan,
-      ...(sim.takeOver2Aktif ? { takeOver2: sim.takeOver2, takeOverBulan2: sim.takeOverBulan2 } : {}),
-      ringkas: {
-        totalTanpaTakeOver: sim.result.totalTanpaTakeOver,
-        totalDenganTakeOver: sim.result.totalDenganTakeOver,
-        selisih: sim.result.selisih,
-        selisihPersen: sim.result.selisihPersen,
-      },
-    };
+    let saved: SavedSim;
+    if (mode === 'berjenjang') {
+      if (!bj.hasil) return;
+      saved = {
+        id: genId(),
+        nama,
+        dibuat: Date.now(),
+        jenis: 'berjenjang',
+        berjenjang: bj.input,
+        ringkas: {
+          totalBunga: bj.hasil.totalBunga,
+          totalBayar: bj.hasil.totalBayar,
+          cicilanAwal: bj.hasil.cicilanAwal,
+          cicilanAkhir: bj.hasil.cicilanAkhir,
+        },
+      };
+    } else {
+      if (!sim.result) return;
+      saved = {
+        id: genId(),
+        nama,
+        dibuat: Date.now(),
+        jenis: 'takeover',
+        kpr1: sim.kpr1,
+        takeOver: sim.takeOver,
+        takeOverBulan: sim.takeOverBulan,
+        ...(sim.takeOver2Aktif ? { takeOver2: sim.takeOver2, takeOverBulan2: sim.takeOverBulan2 } : {}),
+        ringkas: {
+          totalTanpaTakeOver: sim.result.totalTanpaTakeOver,
+          totalDenganTakeOver: sim.result.totalDenganTakeOver,
+          selisih: sim.result.selisih,
+          selisihPersen: sim.result.selisihPersen,
+        },
+      };
+    }
     saveSim(saved);
     setSims(loadSims());
     setSaveOpen(false);
@@ -163,10 +194,16 @@ export default function App() {
   };
 
   const openSim = (s: SavedSim) => {
-    sim.setKpr1(s.kpr1);
-    sim.setTakeOver(s.takeOver);
-    sim.setTakeOverBulan(s.takeOverBulan ?? s.kpr1.masaFixBulan);
-    sim.setTakeOver2(s.takeOver2, s.takeOverBulan2);
+    if (simBerjenjang(s)) {
+      bj.gantiInput(s.berjenjang);
+      setMode('berjenjang');
+    } else {
+      sim.setKpr1(s.kpr1);
+      sim.setTakeOver(s.takeOver);
+      sim.setTakeOverBulan(s.takeOverBulan ?? s.kpr1.masaFixBulan);
+      sim.setTakeOver2(s.takeOver2, s.takeOverBulan2);
+      setMode('takeover');
+    }
     setDrawer(false);
     scrollToResult();
   };
@@ -188,7 +225,7 @@ export default function App() {
             <button
               className="iconround"
               onClick={openShare}
-              disabled={mode !== 'takeover' || !sim.result}
+              disabled={!adaHasil}
               aria-label="Bagikan simulasi"
               title="Bagikan simulasi"
             >
@@ -303,7 +340,7 @@ export default function App() {
         </div>
 
         <div className="cta-row">
-          <button className="cta" onClick={() => setSaveOpen(true)} disabled={mode !== 'takeover' || !sim.result}>
+          <button className="cta" onClick={() => setSaveOpen(true)} disabled={!adaHasil}>
             <span className="i-save" aria-hidden /> Simpan simulasi
           </button>
         </div>
@@ -324,9 +361,13 @@ export default function App() {
       <SaveDialog
         open={saveOpen}
         ringkasText={
-          sim.result
-            ? `Hemat ${formatRingkas(sim.result.selisih)} · ${formatPersenLabel(Math.abs(sim.result.selisihPersen))}`
-            : undefined
+          mode === 'berjenjang'
+            ? bj.hasil
+              ? `Cicilan ${formatRingkas(bj.hasil.cicilanAwal)} → ${formatRingkas(bj.hasil.cicilanAkhir)} · bunga ${formatRingkas(bj.hasil.totalBunga)}`
+              : undefined
+            : sim.result
+              ? `Hemat ${formatRingkas(sim.result.selisih)} · ${formatPersenLabel(Math.abs(sim.result.selisihPersen))}`
+              : undefined
         }
         onCancel={() => setSaveOpen(false)}
         onSave={handleSave}
@@ -352,7 +393,8 @@ export default function App() {
 
       {/* Kartu sumber screenshot: off-screen tapi tetap opaque agar html2canvas bisa merender */}
       <div aria-hidden style={{ position: 'fixed', left: -10000, top: 0, width: 720, pointerEvents: 'none' }}>
-        {sim.result && <ShareCard
+        {mode === 'berjenjang' && bj.hasil && <ShareCardBerjenjang ref={shareRef} hasil={bj.hasil} input={bj.input} />}
+        {mode === 'takeover' && sim.result && <ShareCard
             ref={shareRef}
             result={sim.result}
             kpr1={sim.kpr1}

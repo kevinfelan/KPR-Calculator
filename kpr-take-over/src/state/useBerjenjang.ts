@@ -18,6 +18,9 @@ export function useBerjenjang() {
 
   const patch = (p: Partial<KprBerjenjangInput>) => setInput((s) => ({ ...s, ...p }));
 
+  /** Ganti seluruh input, mis. saat membuka simulasi tersimpan. */
+  const gantiInput = (v: KprBerjenjangInput) => setInput(v);
+
   const patchJenjang = (i: number, p: Partial<JenjangBunga>) =>
     setInput((s) => ({
       ...s,
@@ -41,6 +44,7 @@ export function useBerjenjang() {
   return {
     input,
     patch,
+    gantiInput,
     patchJenjang,
     mulaiTahun,
     urutanNaik,

@@ -1,4 +1,12 @@
-import type { SavedSim } from '../lib/types';
+import type { SavedSim, SavedSimBerjenjang, SavedSimTakeOver } from '../lib/types';
+
+export function simBerjenjang(s: SavedSim): s is SavedSimBerjenjang {
+  return s.jenis === 'berjenjang';
+}
+
+export function simTakeOver(s: SavedSim): s is SavedSimTakeOver {
+  return s.jenis !== 'berjenjang';
+}
 
 const KEY_SIM = 'kpr.sims.v1';
 

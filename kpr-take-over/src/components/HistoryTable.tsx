@@ -1,4 +1,5 @@
 import type { SavedSim } from '../lib/types';
+import { simBerjenjang } from '../storage/db';
 import { formatRingkas, formatPersenLabel, formatPersen } from '../lib/format';
 
 const fmtTanggal = (ts: number) =>
@@ -16,6 +17,33 @@ interface Props {
   onClose: () => void;
   onOpenSim: (s: SavedSim) => void;
   onDelete: (id: string) => void;
+}
+
+/** Ringkasan tiap simulasi, disamakan bentuknya supaya muat di satu tabel. */
+function ringkasan(s: SavedSim) {
+  if (simBerjenjang(s)) {
+    const b = s.berjenjang;
+    return {
+      jenis: 'Berjenjang',
+      pokok: b.pokok,
+      bunga: [...b.jenjang.map((j) => `${formatPersen(j.bunga)}%`), `${formatPersen(b.bungaSetelah)}%`].join(' → '),
+      totalLabel: 'Total bunga',
+      total: s.ringkas.totalBunga,
+      hasil: `${formatRingkas(s.ringkas.cicilanAwal)} → ${formatRingkas(s.ringkas.cicilanAkhir)}`,
+      hasilLabel: 'Cicilan awal → akhir',
+      baik: null as boolean | null,
+    };
+  }
+  return {
+    jenis: s.takeOver2 ? 'Take over 2x' : 'Take over',
+    pokok: s.kpr1.pokok,
+    bunga: `${formatPersen(s.takeOver.bungaFix)}% / ${formatPersen(s.takeOver.bungaFloating)}%`,
+    totalLabel: 'Dengan take over',
+    total: s.ringkas.totalDenganTakeOver,
+    hasil: `${formatRingkas(Math.abs(s.ringkas.selisih))} · ${formatPersenLabel(Math.abs(s.ringkas.selisihPersen))}`,
+    hasilLabel: s.ringkas.selisih >= 0 ? 'Hemat' : 'Lebih mahal',
+    baik: s.ringkas.selisih >= 0,
+  };
 }
 
 export function HistoryTable({ open, sims, onClose, onOpenSim, onDelete }: Props) {
@@ -43,70 +71,68 @@ export function HistoryTable({ open, sims, onClose, onOpenSim, onDelete }: Props
                   <tr>
                     <th>Nama</th>
                     <th>Tanggal</th>
+                    <th>Jenis</th>
                     <th>Sisa plafon</th>
-                    <th>Bunga fix / float</th>
-                    <th>Tanpa TO</th>
-                    <th>Dengan TO</th>
-                    <th>Hemat</th>
+                    <th>Bunga</th>
+                    <th>Total bunga</th>
+                    <th>Hasil</th>
                     <th aria-label="Aksi"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sims.map((s) => (
-                    <tr key={s.id}>
-                      <td className="cell-name">{s.nama}</td>
-                      <td className="cell-muted">{fmtTanggal(s.dibuat)}</td>
-                      <td>{formatRingkas(s.kpr1.pokok)}</td>
-                      <td className="cell-muted">
-                        {formatPersen(s.takeOver.bungaFix)}% / {formatPersen(s.takeOver.bungaFloating)}%
-                      </td>
-                      <td>{formatRingkas(s.ringkas.totalTanpaTakeOver)}</td>
-                      <td>{formatRingkas(s.ringkas.totalDenganTakeOver)}</td>
-                      <td className={s.ringkas.selisih >= 0 ? 'good' : 'bad'}>
-                        {formatRingkas(s.ringkas.selisih)}
-                        <span className="cell-pct">{formatPersenLabel(Math.abs(s.ringkas.selisihPersen))}</span>
-                      </td>
-                      <td className="cell-actions">
-                        <button className="minibtn" onClick={() => onOpenSim(s)}>Buka</button>
-                        <button className="minibtn minibtn--danger" onClick={() => onDelete(s.id)} aria-label={`Hapus ${s.nama}`}>
-                          Hapus
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {sims.map((s) => {
+                    const r = ringkasan(s);
+                    return (
+                      <tr key={s.id}>
+                        <td className="cell-name">{s.nama}</td>
+                        <td className="cell-muted">{fmtTanggal(s.dibuat)}</td>
+                        <td><span className="tag-jenis">{r.jenis}</span></td>
+                        <td>{formatRingkas(r.pokok)}</td>
+                        <td className="cell-muted">{r.bunga}</td>
+                        <td>{formatRingkas(r.total)}</td>
+                        <td className={r.baik === null ? undefined : r.baik ? 'good' : 'bad'}>{r.hasil}</td>
+                        <td className="cell-actions">
+                          <button className="minibtn" onClick={() => onOpenSim(s)}>Buka</button>
+                          <button className="minibtn minibtn--danger" onClick={() => onDelete(s.id)} aria-label={`Hapus ${s.nama}`}>
+                            Hapus
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
             {/* Kartu — layar mobile */}
             <div className="history-cards">
-              {sims.map((s) => (
-                <div className="simcard" key={s.id}>
-                  <div className="simcard__top">
-                    <span className="simcard__name">{s.nama}</span>
-                    <span className="simcard__date">{fmtTanggal(s.dibuat)}</span>
+              {sims.map((s) => {
+                const r = ringkasan(s);
+                return (
+                  <div className="simcard" key={s.id}>
+                    <div className="simcard__top">
+                      <span className="simcard__name">{s.nama}</span>
+                      <span className="simcard__date">{fmtTanggal(s.dibuat)}</span>
+                    </div>
+                    <div className="simcard__grid">
+                      <div><span>Jenis</span><strong>{r.jenis}</strong></div>
+                      <div><span>Sisa plafon</span><strong>{formatRingkas(r.pokok)}</strong></div>
+                      <div><span>Bunga</span><strong>{r.bunga}</strong></div>
+                      <div><span>{r.totalLabel}</span><strong>{formatRingkas(r.total)}</strong></div>
+                    </div>
+                    <div className={`simcard__hemat ${r.baik === false ? 'simcard__hemat--bad' : ''}`}>
+                      <span>{r.hasilLabel}</span>
+                      <strong>{r.hasil}</strong>
+                    </div>
+                    <div className="simcard__actions">
+                      <button className="minibtn" onClick={() => onOpenSim(s)}>Buka</button>
+                      <button className="minibtn minibtn--danger" onClick={() => onDelete(s.id)} aria-label={`Hapus ${s.nama}`}>
+                        Hapus
+                      </button>
+                    </div>
                   </div>
-                  <div className="simcard__grid">
-                    <div><span>Sisa plafon</span><strong>{formatRingkas(s.kpr1.pokok)}</strong></div>
-                    <div><span>Bunga fix / float</span><strong>{formatPersen(s.takeOver.bungaFix)}% / {formatPersen(s.takeOver.bungaFloating)}%</strong></div>
-                    <div><span>Tanpa take over</span><strong>{formatRingkas(s.ringkas.totalTanpaTakeOver)}</strong></div>
-                    <div><span>Dengan take over</span><strong>{formatRingkas(s.ringkas.totalDenganTakeOver)}</strong></div>
-                  </div>
-                  <div className={`simcard__hemat ${s.ringkas.selisih >= 0 ? '' : 'simcard__hemat--bad'}`}>
-                    <span>{s.ringkas.selisih >= 0 ? 'Hemat' : 'Lebih mahal'}</span>
-                    <strong>
-                      {formatRingkas(Math.abs(s.ringkas.selisih))}
-                      <em>{formatPersenLabel(Math.abs(s.ringkas.selisihPersen))}</em>
-                    </strong>
-                  </div>
-                  <div className="simcard__actions">
-                    <button className="minibtn" onClick={() => onOpenSim(s)}>Buka</button>
-                    <button className="minibtn minibtn--danger" onClick={() => onDelete(s.id)} aria-label={`Hapus ${s.nama}`}>
-                      Hapus
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

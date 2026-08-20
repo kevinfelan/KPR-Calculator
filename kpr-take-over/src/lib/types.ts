@@ -105,10 +105,15 @@ export interface BankPreset {
   bawaan?: boolean;
 }
 
-export interface SavedSim {
+interface SavedSimDasar {
   id: string;
   nama: string;
   dibuat: number;
+}
+
+export interface SavedSimTakeOver extends SavedSimDasar {
+  /** Tidak diisi pada data lama — dianggap simulasi take over. */
+  jenis?: 'takeover';
   kpr1: KprInput;
   takeOver: TakeOverInput;
   takeOverBulan: number;
@@ -122,6 +127,19 @@ export interface SavedSim {
     selisihPersen: number;
   };
 }
+
+export interface SavedSimBerjenjang extends SavedSimDasar {
+  jenis: 'berjenjang';
+  berjenjang: KprBerjenjangInput;
+  ringkas: {
+    totalBunga: number;
+    totalBayar: number;
+    cicilanAwal: number;
+    cicilanAkhir: number;
+  };
+}
+
+export type SavedSim = SavedSimTakeOver | SavedSimBerjenjang;
 
 /* ------------------------------ KPR berjenjang ---------------------------- */
 
