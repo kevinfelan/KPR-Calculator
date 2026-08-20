@@ -41,7 +41,10 @@ export function Logo({ size = 30 }: { size?: number }) {
       </g>
       <path d="M31.6 27.7l-.2 3.2-3.1-.5" fill="#14110a" />
       <circle cx="12.5" cy="31.5" r="3.6" fill="#14110a" />
-      <text x="12.5" y="34" textAnchor="middle" fontSize="6" fontWeight="700" fill="#e3c163" fontFamily="Segoe UI, Arial, sans-serif">%</text>
+      {/* tanda "%" digambar sebagai vektor supaya tidak bergantung font */}
+      <circle cx="11.3" cy="30.3" r="0.85" fill="#e3c163" />
+      <circle cx="13.7" cy="32.7" r="0.85" fill="#e3c163" />
+      <path d="M10.8 32.9 14.2 30.1" stroke="#e3c163" strokeWidth="0.8" strokeLinecap="round" />
     </svg>
   );
 }
