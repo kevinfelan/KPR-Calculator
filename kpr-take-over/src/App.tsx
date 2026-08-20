@@ -242,7 +242,6 @@ export default function App() {
                 <>
                   <Kolaps
                     className="kotak-simulasi"
-                    bawaanTerbuka
                     judul="Simulasi cicilan per tahun"
                     ringkas="sebelum vs sesudah take over"
                   >
