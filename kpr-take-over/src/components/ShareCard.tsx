@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import type { ComparisonResult, KprInput, TakeOverInput } from '../lib/types';
-import { formatRingkas, formatRupiah, formatPersen, formatPersenLabel, tahunDariBulan } from '../lib/format';
+import { bangunCicilanTahunan } from '../lib/finance';
+import { formatRingkas, formatPersen, formatPersenLabel, tahunDariBulan } from '../lib/format';
 import { Logo } from './Logo';
 
 interface Props {
@@ -25,7 +26,6 @@ const C = {
   goldLight: '#eecf7c',
   line: '#e6e1d3',
   surface2: '#f6f3ec',
-  naik: '#ffc7b2',
 };
 
 /** Kartu ringkasan untuk di-screenshot & dibagikan. Warna dikunci ke tema terang. */
@@ -33,7 +33,6 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(
   ({ result, kpr1, takeOver, takeOverBulan, takeOver2, takeOverBulan2 }, ref) => {
     const hemat = result.hemat;
     const jumlahTahap = result.tahap.length;
-    const bankAkhir = result.kprList.length;
 
     const bank = [
       { nama: 'Bank 1 (lama)', bungaFix: kpr1.bungaFix, bungaFloating: kpr1.bungaFloating },
@@ -44,68 +43,54 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(
     ];
     const kolom = `1.5fr ${bank.map(() => '1fr').join(' ')}`;
 
-    // Sorotan utama: cicilan sebelum vs sesudah, untuk masa fix & masa floating.
-    const sorotan = [
-      {
-        label: 'Masa fix',
-        ket: 'selama bunga masih tetap',
-        sebelum: result.kpr1.cicilanFix,
-        sesudah: result.kprAkhir.cicilanFix,
-      },
-      {
-        label: 'Masa floating',
-        ket: 'setelah masa fix habis',
-        sebelum: result.kpr1.cicilanFloating,
-        sesudah: result.kprAkhir.cicilanFloating,
-      },
-    ];
+    // Sorotan utama: cicilan per tahun, dipecah dua kolom agar kartunya tidak memanjang.
+    const tahunan = bangunCicilanTahunan(result);
+    const separuh = Math.ceil(tahunan.length / 2);
+    const kolomTahun = tahunan.length > 12 ? [tahunan.slice(0, separuh), tahunan.slice(separuh)] : [tahunan];
 
-    const kartuSorotan = (s: (typeof sorotan)[number]) => {
-      const delta = s.sesudah - s.sebelum;
-      const sama = Math.abs(delta) < 1;
-      const turun = delta < 0;
-      const persen = s.sebelum > 0 ? Math.abs(delta) / s.sebelum : 0;
-      const warna = sama ? '#ffffff' : turun ? C.goldLight : C.naik;
-      return (
+    const nilaiTahun = (v: number[]) => (v.length === 0 ? 'lunas' : v.map(formatRingkas).join(' → '));
+
+    const tabelTahun = (baris: typeof tahunan, i: number) => (
+      <div key={i} style={{ flex: 1 }}>
         <div
-          key={s.label}
           style={{
-            flex: 1,
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.14)',
-            borderRadius: 14,
-            padding: '12px 14px',
+            display: 'grid',
+            gridTemplateColumns: '46px 1fr 1fr',
+            fontSize: 10.5,
+            fontWeight: 700,
+            color: 'rgba(255,255,255,0.6)',
+            padding: '0 8px 4px',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{s.label}</span>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{s.ket}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.62)' }}>Sebelum · Bank 1</div>
-              <div style={{ fontSize: 17, fontWeight: 800, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>
-                {formatRupiah(s.sebelum)}
-              </div>
-            </div>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>→</div>
-            <div style={{ flex: 1, textAlign: 'right' }}>
-              <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.62)' }}>Sesudah · Bank {bankAkhir}</div>
-              <div style={{ fontSize: 17, fontWeight: 800, color: warna, fontVariantNumeric: 'tabular-nums' }}>
-                {formatRupiah(s.sesudah)}
-              </div>
-            </div>
-          </div>
-          <div style={{ marginTop: 8, fontSize: 11.5, fontWeight: 700, color: warna }}>
-            {sama
-              ? 'cicilan praktis sama'
-              : `${turun ? '▼' : '▲'} ${formatRupiah(Math.abs(delta))}/bln (${formatPersenLabel(persen)}) ${
-                  turun ? 'lebih ringan' : 'lebih berat'
-                }`}
-          </div>
+          <div>Tahun</div>
+          <div style={{ textAlign: 'right' }}>Tanpa TO</div>
+          <div style={{ textAlign: 'right' }}>Dengan TO</div>
         </div>
-      );
-    };
+        {baris.map((b) => {
+          const turun =
+            b.tanpa.length === 1 && b.dengan.length === 1 && b.dengan[0] < b.tanpa[0];
+          return (
+            <div
+              key={b.tahun}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '46px 1fr 1fr',
+                fontSize: 12,
+                padding: '4px 8px',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              <div style={{ color: 'rgba(255,255,255,0.72)' }}>{b.tahun}</div>
+              <div style={{ textAlign: 'right', color: '#fff' }}>{nilaiTahun(b.tanpa)}</div>
+              <div style={{ textAlign: 'right', color: turun ? C.goldLight : '#fff', fontWeight: 700 }}>
+                {nilaiTahun(b.dengan)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
 
     const kotakAngka = (judul: string, nilai: string, gelap = false) => (
       <div
@@ -164,9 +149,9 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(
         <div style={{ background: C.frame, borderRadius: 16, padding: '18px 20px' }}>
           <div style={{ textAlign: 'center', fontSize: 13, color: C.goldLight }}>Cicilan per bulan</div>
           <div style={{ textAlign: 'center', fontSize: 21, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>
-            {jumlahTahap > 1 ? 'Sebelum → setelah 2x take over' : 'Sebelum → sesudah take over'}
+            Sebelum → sesudah take over
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 14 }}>{sorotan.map(kartuSorotan)}</div>
+          <div style={{ display: 'flex', gap: 18, marginTop: 12 }}>{kolomTahun.map(tabelTahun)}</div>
         </div>
 
         {/* Ringkasan biaya — jadi pendukung, bukan sorotan */}
