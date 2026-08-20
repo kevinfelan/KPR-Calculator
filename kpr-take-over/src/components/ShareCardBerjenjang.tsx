@@ -26,10 +26,15 @@ const tahunDari = (bulan: number) => Math.ceil(bulan / 12);
 
 /** Kartu share untuk kalkulator KPR berjenjang. Warna dikunci ke tema terang. */
 export const ShareCardBerjenjang = forwardRef<HTMLDivElement, Props>(({ hasil, input }, ref) => {
+  const jenjangDipakai = hasil.fase.filter((f) => f.urutan !== 0).length;
+  // Kartu jenjang disusun rata: maksimal 5 per baris, dan bila perlu dua baris
+  // isinya dibagi seimbang (7 jenjang jadi 4 + 3, bukan 5 + 2).
+  const barisKartu = Math.ceil(hasil.fase.length / 5);
+  const kolomKartu = Math.ceil(hasil.fase.length / barisKartu);
   const kotakAngka = (judul: string, nilai: string, sorot = false) => (
     <div style={{ flex: 1, background: sorot ? C.goldSoft : C.surface2, borderRadius: 12, padding: '10px 14px' }}>
       <div style={{ fontSize: 11.5, color: sorot ? C.goldInk : C.muted }}>{judul}</div>
-      <div style={{ fontSize: 18, fontWeight: 800, color: sorot ? C.goldInk : C.ink, fontVariantNumeric: 'tabular-nums' }}>
+      <div style={{ fontSize: 18, fontWeight: 800, color: sorot ? C.goldInk : C.ink, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
         {nilai}
       </div>
     </div>
@@ -51,28 +56,28 @@ export const ShareCardBerjenjang = forwardRef<HTMLDivElement, Props>(({ hasil, i
         <div style={{ textAlign: 'center', fontSize: 21, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>
           Berubah tiap jenjang bunga
         </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${kolomKartu}, 1fr)`, gap: 10, marginTop: 14 }}>
           {hasil.fase.map((f) => (
             <div
               key={f.dariBulan}
               style={{
-                flex: 1,
                 background: 'rgba(255,255,255,0.08)',
                 border: '1px solid rgba(255,255,255,0.14)',
-                borderRadius: 14,
-                padding: '12px 12px',
+                borderRadius: 12,
+                padding: '10px 10px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
               }}
             >
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: '#fff' }}>
                 {f.urutan === 0 ? 'Lanjutan' : `Jenjang ${f.urutan}`}
               </div>
-              <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.62)' }}>
-                Tahun {tahunDari(f.dariBulan)} – {tahunDari(f.sampaiBulan)}
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.62)' }}>
+                Th {tahunDari(f.dariBulan)}–{tahunDari(f.sampaiBulan)} · {formatPersen(f.bunga)}%
               </div>
-              <div style={{ fontSize: 17, fontWeight: 800, color: C.goldLight, marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontSize: 15.5, fontWeight: 800, color: C.goldLight, marginTop: 6, fontVariantNumeric: 'tabular-nums' }}>
                 {formatRingkas(f.cicilan)}
               </div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>bunga {formatPersen(f.bunga)}%</div>
             </div>
           ))}
         </div>
@@ -110,10 +115,16 @@ export const ShareCardBerjenjang = forwardRef<HTMLDivElement, Props>(({ hasil, i
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 12, fontSize: 12.5, color: C.muted, background: C.surface2, borderRadius: 12, padding: '11px 16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '4px 14px', marginTop: 12, fontSize: 11.5, color: C.muted, background: C.surface2, borderRadius: 12, padding: '10px 14px', whiteSpace: 'nowrap' }}>
         <span>Plafon <b style={{ color: C.ink }}>{formatRingkas(input.pokok)}</b></span>
         <span>Tenor <b style={{ color: C.ink }}>{input.tenorBulan} bln ({tahunDariBulan(input.tenorBulan)} th)</b></span>
-        <span>Jumlah jenjang <b style={{ color: C.ink }}>{input.jenjang.length}</b></span>
+        <span>
+          Jenjang{' '}
+          <b style={{ color: C.ink }}>
+            {jenjangDipakai}
+            {jenjangDipakai < input.jenjang.length ? ` dari ${input.jenjang.length}` : ''}
+          </b>
+        </span>
         <span>Total dibayar <b style={{ color: C.ink }}>{formatRingkas(hasil.totalBayar)}</b></span>
       </div>
 

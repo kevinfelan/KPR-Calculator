@@ -211,7 +211,7 @@ button { font-family: inherit; }
   appearance: none; -webkit-appearance: none; border: none; background: transparent; outline: none;
   color: var(--ink); font-size: 15px; font-weight: 600; width: 100%; cursor: pointer;
 }
-.field__chev { color: var(--faint); pointer-events: none; }
+.field__chev { color: var(--muted); font-size: 18px; line-height: 1; pointer-events: none; }
 .field__prefix, .field__suffix { color: var(--faint); font-size: 13px; font-weight: 600; flex: none; }
 .field__hint { font-size: 11px; color: var(--faint); margin-top: -1px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .hint-auto { color: var(--accent); font-weight: 600; }
@@ -219,7 +219,7 @@ button { font-family: inherit; }
 .hint-reset:hover { opacity: 0.8; }
 
 .monthfield { position: relative; }
-.monthfield__toggle { border: none; background: transparent; color: var(--faint); cursor: pointer; font-size: 13px; line-height: 1; padding: 4px 2px 4px 6px; flex: none; }
+.monthfield__toggle { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 0 2px 6px; flex: none; }
 .monthfield__toggle:hover { color: var(--gold); }
 .monthfield__menu {
   position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 25;
@@ -521,7 +521,11 @@ button { font-family: inherit; }
 .kolaps__judul { font-size: 13.5px; font-weight: 700; }
 .kolaps__ringkas { font-size: 12.5px; font-variant-numeric: tabular-nums; }
 .kolaps__ringkas em { font-style: normal; font-size: 11.5px; font-weight: 700; margin-left: 6px; opacity: 0.85; }
-.kolaps__chev { font-size: 14px; transition: transform 0.3s ease; }
+.kolaps__chev {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 28px; height: 28px; border-radius: 50%; font-size: 20px; line-height: 1;
+  background: var(--gold-soft); color: var(--gold-ink); transition: transform 0.3s ease;
+}
 .kolaps.is-open .kolaps__chev { transform: rotate(180deg); }
 /* buka ke bawah: tingginya diukur di komponen lalu dianimasikan lewat max-height */
 .kolaps__panel { max-height: 0; overflow: hidden; transition: max-height 0.34s ease; }
@@ -534,13 +538,13 @@ button { font-family: inherit; }
 .kotak-simulasi { background: var(--surface); border: 1px solid var(--line); }
 .kotak-simulasi .kolaps__judul { color: var(--ink); }
 .kotak-simulasi .kolaps__ringkas { color: var(--muted); }
-.kotak-simulasi .kolaps__chev { color: var(--gold); }
+.kotak-simulasi .kolaps__chev { background: var(--gold-soft); color: var(--gold-ink); }
 
 /* kotak hasil — permukaan gelap */
 .kolaps--hasil { background: var(--ink-deep); border: 1px solid rgba(238, 207, 124, 0.28); color: #fff; }
 .kolaps--hasil .kolaps__judul { color: var(--gold-light); }
 .kolaps--hasil .kolaps__ringkas { color: #fff; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
-.kolaps--hasil .kolaps__chev { color: var(--gold-light); }
+.kolaps--hasil .kolaps__chev { background: rgba(255, 255, 255, 0.12); color: var(--gold-light); }
 .kolaps--bad { background: #3b2318; }
 
 /* tabel simulasi cicilan sepanjang tenor */

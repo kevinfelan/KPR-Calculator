@@ -108,6 +108,7 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(
             fontWeight: 800,
             color: gelap ? C.goldInk : C.ink,
             fontVariantNumeric: 'tabular-nums',
+            whiteSpace: 'nowrap',
           }}
         >
           {nilai}
