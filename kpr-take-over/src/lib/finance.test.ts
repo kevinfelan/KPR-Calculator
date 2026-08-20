@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import {
   amortize,
+  amortizeBerjenjang,
   bangunCicilanTahunan,
   buildComparison,
   seriCicilanDenganTakeOver,
   seriCicilanTanpaTakeOver,
 } from './finance';
-import type { KprInput, TakeOverInput } from './types';
+import type { KprBerjenjangInput, KprInput, TakeOverInput } from './types';
 
 // Skenario referensi persis dari file "Perhitungan KPR Take Over.xlsx".
 const kpr1: KprInput = {
@@ -226,5 +227,109 @@ describe('cicilan tahunan — simulasi selama tenor', () => {
     const bd = bangunCicilanTahunan(dua);
     expect(bd[4].takeOver).toEqual([1]); // bulan global 60 -> tahun 5
     expect(bd[9].takeOver).toEqual([2]); // bulan global 120 -> tahun 10
+  });
+});
+
+describe('amortizeBerjenjang — KPR bunga bertingkat', () => {
+  const berjenjang: KprBerjenjangInput = {
+    pokok: 2_000_000_000,
+    tenorBulan: 240,
+    jenjang: [
+      { sampaiTahun: 3, bunga: 0.03 },
+      { sampaiTahun: 6, bunga: 0.06 },
+      { sampaiTahun: 9, bunga: 0.09 },
+    ],
+    bungaSetelah: 0.12,
+  };
+  const r = amortizeBerjenjang(berjenjang);
+
+  it('fase menyambung tanpa bolong dan berhenti di akhir tenor', () => {
+    expect(r.fase.map((f) => [f.dariBulan, f.sampaiBulan])).toEqual([
+      [1, 36],
+      [37, 72],
+      [73, 108],
+      [109, 240],
+    ]);
+    expect(r.rows).toHaveLength(240);
+  });
+
+  it('sisa tenor setelah jenjang terakhir memakai bunga lanjutan', () => {
+    const akhir = r.fase[r.fase.length - 1];
+    expect(akhir.urutan).toBe(0);
+    expect(akhir.bunga).toBe(0.12);
+  });
+
+  it('KPR lunas di akhir tenor', () => {
+    expect(r.rows[239].saldo).toBeCloseTo(0, 4);
+  });
+
+  it('cicilan jenjang 1 = anuitas pokok penuh sepanjang tenor', () => {
+    // 2 M, 3% setahun, 240 bulan — dibandingkan dengan mesin anuitas yang sama
+    const acuan = amortize({
+      pokok: 2_000_000_000,
+      tenorBulan: 240,
+      masaFixBulan: 240,
+      bungaFix: 0.03,
+      bungaFloating: 0.03,
+    });
+    expect(r.fase[0].cicilan).toBeCloseTo(acuan.cicilanFix, 6);
+    expect(r.cicilanAwal).toBe(r.fase[0].cicilan);
+  });
+
+  it('cicilan naik tiap jenjang karena bunganya naik', () => {
+    const cicilan = r.fase.map((f) => f.cicilan);
+    for (let i = 1; i < cicilan.length; i++) {
+      expect(cicilan[i]).toBeGreaterThan(cicilan[i - 1]);
+    }
+  });
+
+  it('total bayar = pokok + total bunga', () => {
+    expect(r.totalBayar).toBeCloseTo(berjenjang.pokok + r.totalBunga, 2);
+    expect(r.totalBunga).toBeCloseTo(
+      r.rows.reduce((a, b) => a + b.bunga, 0),
+      2,
+    );
+  });
+
+  it('bunga rata di semua jenjang setara KPR bunga tunggal', () => {
+    // Semua jenjang 3% + lanjutan 3% harus sama persis dengan amortize biasa
+    // yang masa fix-nya penuh 240 bulan pada 3%.
+    const rata = amortizeBerjenjang({
+      ...berjenjang,
+      jenjang: [
+        { sampaiTahun: 3, bunga: 0.03 },
+        { sampaiTahun: 6, bunga: 0.03 },
+        { sampaiTahun: 9, bunga: 0.03 },
+      ],
+      bungaSetelah: 0.03,
+    });
+    const tunggal = amortize({
+      pokok: 2_000_000_000,
+      tenorBulan: 240,
+      masaFixBulan: 240,
+      bungaFix: 0.03,
+      bungaFloating: 0.03,
+    });
+    expect(rata.totalBunga).toBeCloseTo(tunggal.totalBunga, 2);
+    expect(rata.cicilanAwal).toBeCloseTo(tunggal.cicilanFix, 2);
+  });
+
+  it('jenjang yang melewati tenor dipotong, sisanya diabaikan', () => {
+    const pendek = amortizeBerjenjang({ ...berjenjang, tenorBulan: 48 });
+    expect(pendek.fase.map((f) => [f.dariBulan, f.sampaiBulan])).toEqual([
+      [1, 36],
+      [37, 48],
+    ]);
+    expect(pendek.rows).toHaveLength(48);
+    expect(pendek.rows[47].saldo).toBeCloseTo(0, 4);
+  });
+
+  it('jenjang terakhir tepat di akhir tenor tidak menambah fase lanjutan', () => {
+    const pas = amortizeBerjenjang({
+      ...berjenjang,
+      tenorBulan: 108,
+    });
+    expect(pas.fase).toHaveLength(3);
+    expect(pas.fase[2].sampaiBulan).toBe(108);
   });
 });

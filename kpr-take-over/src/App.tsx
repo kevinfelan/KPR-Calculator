@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSimulation } from './state/useSimulation';
+import { useBerjenjang } from './state/useBerjenjang';
 import { Logo } from './components/Logo';
 import { InputScreen } from './components/InputScreen';
 import { ResultScreen } from './components/ResultScreen';
 import { TabelCicilan } from './components/TabelCicilan';
 import { Kolaps } from './components/Kolaps';
+import { Switch } from './components/Switch';
+import { InputBerjenjang } from './components/InputBerjenjang';
+import { HasilBerjenjangPanel } from './components/HasilBerjenjang';
 import { ResultDetails } from './components/ResultDetails';
 import { HistoryTable } from './components/HistoryTable';
 import { SaveDialog } from './components/SaveDialog';
@@ -17,6 +21,8 @@ import { TAMPILKAN_JADWAL_ANGSURAN } from './tampilan';
 
 export default function App() {
   const sim = useSimulation();
+  const bj = useBerjenjang();
+  const [mode, setMode] = useState<'takeover' | 'berjenjang'>('takeover');
   const [sims, setSims] = useState<SavedSim[]>([]);
   const [drawer, setDrawer] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
@@ -182,7 +188,7 @@ export default function App() {
             <button
               className="iconround"
               onClick={openShare}
-              disabled={!sim.result}
+              disabled={mode !== 'takeover' || !sim.result}
               aria-label="Bagikan simulasi"
               title="Bagikan simulasi"
             >
@@ -209,53 +215,86 @@ export default function App() {
 
       <main className="wrap">
         <div className="maincard">
-          <div className="maincard__head">Kalkulator KPR Take Over</div>
-          <div className="maincard__body">
-            <InputScreen
-              kpr1={sim.kpr1}
-              takeOver={sim.takeOver}
-              takeOverBulan={sim.takeOverBulan}
-              patchKpr1={sim.patchKpr1}
-              patchTakeOver={sim.patchTakeOver}
-              setTakeOverBulan={sim.setTakeOverBulan}
-              tenorBaruManual={sim.tenorBaruManual}
-              tenorBaruDefault={sim.tenorBaruDefault}
-              resetTenorBaru={sim.resetTenorBaru}
-              pokokPindah={sim.result?.pokokPindah}
-              totalTanpaTakeOver={sim.result?.totalTanpaTakeOver}
-              takeOver2={sim.takeOver2}
-              takeOver2Aktif={sim.takeOver2Aktif}
-              takeOverBulan2={sim.takeOverBulan2}
-              bulan2Manual={sim.bulan2Manual}
-              tenorBaru2Manual={sim.tenorBaru2Manual}
-              tenorBaru2Default={sim.tenorBaru2Default}
-              patchTakeOver2={sim.patchTakeOver2}
-              setTakeOverBulan2={sim.setTakeOverBulan2}
-              aktifkanTakeOver2={sim.aktifkanTakeOver2}
-              hapusTakeOver2={sim.hapusTakeOver2}
-              resetTenorBaru2={sim.resetTenorBaru2}
-              resetBulan2={sim.resetBulan2}
-              pokokPindah2={sim.result?.tahap[1]?.pokokPindah}
+          <div className="maincard__head">
+            <Switch
+              label="Jenis kalkulator"
+              nilai={mode}
+              onChange={setMode}
+              opsi={[
+                { nilai: 'takeover', label: 'KPR Take Over', warna: '#2fa36b' },
+                { nilai: 'berjenjang', label: 'KPR Berjenjang', warna: '#e0a92b' },
+              ]}
             />
-            <div className="maincard__result" ref={resultRef}>
-              {sim.result ? (
-                <>
-                  <Kolaps
-                    className="kotak-simulasi"
-                    judul="Simulasi cicilan per tahun"
-                    ringkas="sebelum vs sesudah take over"
-                  >
-                    <TabelCicilan result={sim.result} />
-                  </Kolaps>
-                  <ResultScreen result={sim.result} />
-                </>
-              ) : (
-                <div className="panel-result panel-result--empty">
-                  Lengkapi data yang valid untuk melihat hasil simulasi.
-                </div>
-              )}
-            </div>
           </div>
+          {mode === 'takeover' ? (
+            <div className="maincard__body">
+              <InputScreen
+                kpr1={sim.kpr1}
+                takeOver={sim.takeOver}
+                takeOverBulan={sim.takeOverBulan}
+                patchKpr1={sim.patchKpr1}
+                patchTakeOver={sim.patchTakeOver}
+                setTakeOverBulan={sim.setTakeOverBulan}
+                tenorBaruManual={sim.tenorBaruManual}
+                tenorBaruDefault={sim.tenorBaruDefault}
+                resetTenorBaru={sim.resetTenorBaru}
+                pokokPindah={sim.result?.pokokPindah}
+                totalTanpaTakeOver={sim.result?.totalTanpaTakeOver}
+                takeOver2={sim.takeOver2}
+                takeOver2Aktif={sim.takeOver2Aktif}
+                takeOverBulan2={sim.takeOverBulan2}
+                bulan2Manual={sim.bulan2Manual}
+                tenorBaru2Manual={sim.tenorBaru2Manual}
+                tenorBaru2Default={sim.tenorBaru2Default}
+                patchTakeOver2={sim.patchTakeOver2}
+                setTakeOverBulan2={sim.setTakeOverBulan2}
+                aktifkanTakeOver2={sim.aktifkanTakeOver2}
+                hapusTakeOver2={sim.hapusTakeOver2}
+                resetTenorBaru2={sim.resetTenorBaru2}
+                resetBulan2={sim.resetBulan2}
+                pokokPindah2={sim.result?.tahap[1]?.pokokPindah}
+              />
+              <div className="maincard__result" ref={resultRef}>
+                {sim.result ? (
+                  <>
+                    <Kolaps
+                      className="kotak-simulasi"
+                      judul="Simulasi cicilan per tahun"
+                      ringkas="sebelum vs sesudah take over"
+                    >
+                      <TabelCicilan result={sim.result} />
+                    </Kolaps>
+                    <ResultScreen result={sim.result} />
+                  </>
+                ) : (
+                  <div className="panel-result panel-result--empty">
+                    Lengkapi data yang valid untuk melihat hasil simulasi.
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="maincard__body">
+              <InputBerjenjang
+                input={bj.input}
+                mulaiTahun={bj.mulaiTahun}
+                urutanNaik={bj.urutanNaik}
+                adaSisaTenor={bj.adaSisaTenor}
+                tenorTahun={bj.tenorTahun}
+                patch={bj.patch}
+                patchJenjang={bj.patchJenjang}
+              />
+              <div className="maincard__result">
+                {bj.hasil ? (
+                  <HasilBerjenjangPanel hasil={bj.hasil} />
+                ) : (
+                  <div className="panel-result panel-result--empty">
+                    Lengkapi data yang valid untuk melihat hasil simulasi.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <div className="trust">
             <div className="trust__item"><span className="i-shield" aria-hidden />Tanpa daftar</div>
             <div className="trust__item"><span className="i-bolt" aria-hidden />Hasil instan</div>
@@ -264,7 +303,7 @@ export default function App() {
         </div>
 
         <div className="cta-row">
-          <button className="cta" onClick={() => setSaveOpen(true)} disabled={!sim.result}>
+          <button className="cta" onClick={() => setSaveOpen(true)} disabled={mode !== 'takeover' || !sim.result}>
             <span className="i-save" aria-hidden /> Simpan simulasi
           </button>
         </div>

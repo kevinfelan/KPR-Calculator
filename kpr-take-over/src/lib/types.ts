@@ -122,3 +122,46 @@ export interface SavedSim {
     selisihPersen: number;
   };
 }
+
+/* ------------------------------ KPR berjenjang ---------------------------- */
+
+/**
+ * Satu jenjang bunga. Tahun mulainya tidak diinput — otomatis menyambung dari
+ * jenjang sebelumnya, supaya rentangnya tidak mungkin bolong atau tumpang tindih.
+ */
+export interface JenjangBunga {
+  /** Jenjang ini berlaku sampai akhir tahun ke-berapa. */
+  sampaiTahun: number;
+  /** Bunga per tahun dalam fraksi (0.03 = 3%). */
+  bunga: number;
+}
+
+export interface KprBerjenjangInput {
+  pokok: number;
+  tenorBulan: number;
+  jenjang: JenjangBunga[];
+  /** Bunga untuk sisa tenor setelah jenjang terakhir habis. */
+  bungaSetelah: number;
+}
+
+export interface FaseBertingkat {
+  /** 1..n untuk jenjang yang diinput, 0 berarti sisa tenor setelah jenjang terakhir. */
+  urutan: number;
+  dariBulan: number;
+  sampaiBulan: number;
+  bunga: number;
+  /** Cicilan per bulan selama fase ini. */
+  cicilan: number;
+  /** Bunga yang dibayar selama fase ini. */
+  totalBunga: number;
+}
+
+export interface HasilBerjenjang {
+  rows: AmortRow[];
+  fase: FaseBertingkat[];
+  totalBunga: number;
+  /** Pokok + seluruh bunga. */
+  totalBayar: number;
+  cicilanAwal: number;
+  cicilanAkhir: number;
+}

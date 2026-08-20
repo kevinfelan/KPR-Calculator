@@ -3,6 +3,9 @@ import type {
   AmortRow,
   ComparisonResult,
   KprInput,
+  FaseBertingkat,
+  HasilBerjenjang,
+  KprBerjenjangInput,
   TahapTakeOver,
   TakeOverInput,
 } from './types';
@@ -238,4 +241,80 @@ export function bangunCicilanTahunan(hasil: ComparisonResult): CicilanTahunan[] 
     });
   }
   return baris;
+}
+
+/* ------------------------------ KPR berjenjang ---------------------------- */
+
+/**
+ * Amortisasi anuitas dengan bunga bertingkat (KPR berjenjang).
+ *
+ * Aturannya sama dengan skema fix-lalu-floating, hanya jumlah fasenya lebih
+ * dari dua: begitu masuk jenjang baru, sisa pokok di-anuitas ulang dengan bunga
+ * jenjang itu sepanjang SISA tenor. Sisa tenor setelah jenjang terakhir memakai
+ * `bungaSetelah`.
+ */
+export function amortizeBerjenjang(input: KprBerjenjangInput): HasilBerjenjang {
+  const n = Math.max(Math.round(input.tenorBulan), 0);
+  const pokok = input.pokok;
+
+  // Rentang tiap jenjang: menyambung dari jenjang sebelumnya, dipotong di tenor.
+  const rencana: { urutan: number; sampaiBulan: number; bunga: number }[] = [];
+  let batas = 0;
+  input.jenjang.forEach((j, i) => {
+    const sampai = Math.min(Math.max(Math.round(j.sampaiTahun) * 12, batas), n);
+    if (sampai > batas) {
+      rencana.push({ urutan: i + 1, sampaiBulan: sampai, bunga: j.bunga });
+      batas = sampai;
+    }
+  });
+  if (batas < n) rencana.push({ urutan: 0, sampaiBulan: n, bunga: input.bungaSetelah });
+
+  const rows: AmortRow[] = [];
+  const fase: FaseBertingkat[] = [];
+  let saldo = pokok;
+  let mulai = 0;
+
+  for (const r of rencana) {
+    const m = r.bunga / 12;
+    const sisaTenor = n - mulai;
+    // Cicilan fase ini = anuitas atas sisa pokok sepanjang sisa tenor.
+    const cicilan = anuitas(saldo, m, sisaTenor);
+    let bungaFase = 0;
+
+    for (let t = mulai + 1; t <= r.sampaiBulan; t++) {
+      const bunga = saldo * m;
+      const pokokBln = cicilan - bunga;
+      saldo -= pokokBln;
+      bungaFase += bunga;
+      rows.push({
+        periode: t,
+        cicilan,
+        bunga,
+        pokok: pokokBln,
+        saldo,
+        fase: r.urutan === 0 ? 'floating' : 'fix',
+      });
+    }
+
+    fase.push({
+      urutan: r.urutan,
+      dariBulan: mulai + 1,
+      sampaiBulan: r.sampaiBulan,
+      bunga: r.bunga,
+      cicilan,
+      totalBunga: bungaFase,
+    });
+    mulai = r.sampaiBulan;
+  }
+
+  const totalBunga = fase.reduce((a, f) => a + f.totalBunga, 0);
+
+  return {
+    rows,
+    fase,
+    totalBunga,
+    totalBayar: pokok + totalBunga,
+    cicilanAwal: fase.length ? fase[0].cicilan : 0,
+    cicilanAkhir: fase.length ? fase[fase.length - 1].cicilan : 0,
+  };
 }
