@@ -3,6 +3,7 @@ import { formatRingkas, formatRupiah, formatPersenLabel } from '../lib/format';
 import { HouseArt } from './HouseArt';
 import { AnimatedNumber } from './AnimatedNumber';
 import { CicilanCompare } from './CicilanCompare';
+import { TAMPILKAN_SOROTAN_CICILAN } from '../tampilan';
 
 /** Label baris bunga untuk tiap KPR pada rantai take over. */
 function labelBunga(i: number, jumlahKpr: number, jumlahTahap: number): string {
@@ -20,22 +21,24 @@ export function ResultScreen({ result }: { result: ComparisonResult }) {
 
   return (
     <div className={`panel-result ${hemat ? '' : 'panel-result--bad'}`}>
-      <div className="pr__hero">
-        <span className="pr__cap">Cicilan per bulan</span>
-        <span className="pr__subtitle">
-          {jumlahTahap > 1 ? 'Sebelum → setelah 2x take over' : 'Sebelum → sesudah take over'}
-        </span>
-        <CicilanCompare result={result} />
-        <div className="pr__note">
-          <span className="i-bulb" aria-hidden />
-          <span>
-            {cicilanAkhir < cicilanAwal
-              ? `Saat masuk masa floating, cicilan turun dari ${formatRingkas(cicilanAwal)} jadi ${formatRingkas(cicilanAkhir)}. `
-              : ''}
-            Biaya yang dikeluarkan hanya biaya take over saja — sering masih ada cashback asuransi dari KPR pertama.
+      {TAMPILKAN_SOROTAN_CICILAN && (
+        <div className="pr__hero">
+          <span className="pr__cap">Cicilan per bulan</span>
+          <span className="pr__subtitle">
+            {jumlahTahap > 1 ? 'Sebelum → setelah 2x take over' : 'Sebelum → sesudah take over'}
           </span>
+          <CicilanCompare result={result} />
+          <div className="pr__note">
+            <span className="i-bulb" aria-hidden />
+            <span>
+              {cicilanAkhir < cicilanAwal
+                ? `Saat masuk masa floating, cicilan turun dari ${formatRingkas(cicilanAwal)} jadi ${formatRingkas(cicilanAkhir)}. `
+                : ''}
+              Biaya yang dikeluarkan hanya biaya take over saja — sering masih ada cashback asuransi dari KPR pertama.
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="pr__rows">
         {result.bungaPerKpr.map((bunga, i) => (

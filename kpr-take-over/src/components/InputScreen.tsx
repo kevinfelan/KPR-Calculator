@@ -1,6 +1,7 @@
 import type { KprInput, TakeOverInput } from '../lib/types';
 import { MoneyField, PercentField, MonthField } from './Fields';
 import { formatRupiah } from '../lib/format';
+import { TAMPILKAN_POKOK_PINDAH, TAMPILKAN_TOTAL_BUNGA_TANPA_TAKE_OVER } from '../tampilan';
 
 interface Props {
   kpr1: KprInput;
@@ -90,7 +91,7 @@ export function InputScreen(props: Props) {
         </div>
         {kpr1.masaFixBulan > kpr1.tenorBulan && <p className="warn">Masa fix tidak boleh melebihi tenor.</p>}
 
-        {totalTanpaTakeOver ? (
+        {TAMPILKAN_TOTAL_BUNGA_TANPA_TAKE_OVER && totalTanpaTakeOver ? (
           <div className="pokok-pindah pokok-pindah--baseline">
             <span>Total bunga tanpa take over</span>
             <strong>{formatRupiah(totalTanpaTakeOver)}</strong>
@@ -113,11 +114,13 @@ export function InputScreen(props: Props) {
           <span className="section__title"><span className="i-swap" aria-hidden />Penawaran take over · Bank 2</span>
         </div>
 
-        <div className="pokok-pindah">
-          <span>Pokok yang dipindah</span>
-          <strong>{pokokPindah ? formatRupiah(pokokPindah) : '—'}</strong>
-          <em>otomatis dari sisa pokok KPR 1 di bulan ke-{takeOverBulan}</em>
-        </div>
+        {TAMPILKAN_POKOK_PINDAH && (
+          <div className="pokok-pindah">
+            <span>Pokok yang dipindah</span>
+            <strong>{pokokPindah ? formatRupiah(pokokPindah) : '—'}</strong>
+            <em>otomatis dari sisa pokok KPR 1 di bulan ke-{takeOverBulan}</em>
+          </div>
+        )}
 
         <div className="grid2">
           <MonthField
@@ -179,11 +182,13 @@ export function InputScreen(props: Props) {
           />
           {takeOverBulan2 > takeOver.tenorBulan && <p className="warn">Bulan take over ke-2 tidak boleh melebihi tenor Bank 2.</p>}
 
-          <div className="pokok-pindah">
-            <span>Pokok yang dipindah</span>
-            <strong>{pokokPindah2 ? formatRupiah(pokokPindah2) : '—'}</strong>
-            <em>otomatis dari sisa pokok Bank 2 di bulan ke-{takeOverBulan2}</em>
-          </div>
+          {TAMPILKAN_POKOK_PINDAH && (
+            <div className="pokok-pindah">
+              <span>Pokok yang dipindah</span>
+              <strong>{pokokPindah2 ? formatRupiah(pokokPindah2) : '—'}</strong>
+              <em>otomatis dari sisa pokok Bank 2 di bulan ke-{takeOverBulan2}</em>
+            </div>
+          )}
 
           <div className="grid2">
             <MonthField

@@ -11,9 +11,7 @@ import { ShareModal } from './components/ShareModal';
 import { loadSims, saveSim, deleteSim, genId } from './storage/db';
 import { formatRingkas, formatPersenLabel } from './lib/format';
 import type { SavedSim } from './lib/types';
-
-// Jadwal angsuran per bulan sementara disembunyikan — set true untuk memunculkannya lagi.
-const TAMPILKAN_JADWAL_ANGSURAN = false;
+import { TAMPILKAN_JADWAL_ANGSURAN } from './tampilan';
 
 export default function App() {
   const sim = useSimulation();
