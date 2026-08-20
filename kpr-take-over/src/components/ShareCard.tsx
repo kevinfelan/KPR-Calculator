@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import type { ComparisonResult, KprInput, TakeOverInput } from '../lib/types';
 import { bangunCicilanTahunan } from '../lib/finance';
-import { formatRingkas, formatPersen, formatPersenLabel, tahunDariBulan } from '../lib/format';
+import { formatRingkas, formatPersen, formatPersenLabel } from '../lib/format';
 import { Logo } from './Logo';
 
 interface Props {
@@ -154,17 +154,6 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(
           <div style={{ display: 'flex', gap: 18, marginTop: 12 }}>{kolomTahun.map(tabelTahun)}</div>
         </div>
 
-        {/* Ringkasan biaya — jadi pendukung, bukan sorotan */}
-        <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-          {kotakAngka('Tanpa take over', formatRingkas(result.totalTanpaTakeOver))}
-          {kotakAngka('Dengan take over', formatRingkas(result.totalDenganTakeOver))}
-          {kotakAngka(
-            hemat ? 'Hemat total bunga' : 'Lebih mahal',
-            `${formatRingkas(Math.abs(result.selisih))} · ${formatPersenLabel(Math.abs(result.selisihPersen))}`,
-            true,
-          )}
-        </div>
-
         <div style={{ marginTop: 14 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginBottom: 8 }}>Perbandingan bunga &amp; cicilan setelah take over</div>
           <div style={{ border: `1px solid ${C.line}`, borderRadius: 12, overflow: 'hidden' }}>
@@ -186,15 +175,32 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 12, fontSize: 12.5, color: C.muted, background: C.surface2, borderRadius: 12, padding: '11px 16px' }}>
+        {/* Ringkasan biaya — pendukung, ditaruh di bawah karena sorotannya tabel cicilan */}
+        <div style={{ marginTop: 14 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>Total yang dibayar sampai lunas</div>
+          <div style={{ fontSize: 11.5, color: C.muted, marginTop: 1, marginBottom: 8 }}>
+            Tiap kotak = pokok + seluruh bunga{jumlahTahap > 0 ? ' + biaya take over' : ''}, beserta selisih penghematannya.
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            {kotakAngka('Tanpa take over', formatRingkas(kpr1.pokok + result.totalTanpaTakeOver))}
+            {kotakAngka('Dengan take over', formatRingkas(kpr1.pokok + result.totalDenganTakeOver))}
+            {kotakAngka(
+              hemat ? 'Hemat' : 'Lebih mahal',
+              `${formatRingkas(Math.abs(result.selisih))} · ${formatPersenLabel(Math.abs(result.selisihPersen))}`,
+              true,
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '4px 14px', marginTop: 12, fontSize: 11.5, color: C.muted, background: C.surface2, borderRadius: 12, padding: '10px 14px', whiteSpace: 'nowrap' }}>
           <span>Plafon <b style={{ color: C.ink }}>{formatRingkas(kpr1.pokok)}</b></span>
-          <span>Tenor <b style={{ color: C.ink }}>{kpr1.tenorBulan} bln ({tahunDariBulan(kpr1.tenorBulan)} th)</b></span>
-          <span>Masa fix <b style={{ color: C.ink }}>{kpr1.masaFixBulan} → {takeOver.masaFixBulan}{takeOver2 && jumlahTahap > 1 ? ` → ${takeOver2.masaFixBulan}` : ''} bln</b></span>
+          <span>Tenor <b style={{ color: C.ink }}>{kpr1.tenorBulan} bln</b></span>
+          <span>Fix <b style={{ color: C.ink }}>{kpr1.masaFixBulan} → {takeOver.masaFixBulan}{takeOver2 && jumlahTahap > 1 ? ` → ${takeOver2.masaFixBulan}` : ''} bln</b></span>
           <span>
-            Take over bln ke{' '}
+            TO bulan{' '}
             <b style={{ color: C.ink }}>
               {takeOverBulan}
-              {jumlahTahap > 1 && takeOverBulan2 !== undefined ? ` lalu ${takeOverBulan2}` : ''}
+              {jumlahTahap > 1 && takeOverBulan2 !== undefined ? ` & ${takeOverBulan2}` : ''}
             </b>
           </span>
           <span>Biaya <b style={{ color: C.ink }}>{formatRingkas(result.biayaTotal)}</b></span>
