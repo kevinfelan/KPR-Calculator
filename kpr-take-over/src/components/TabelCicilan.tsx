@@ -1,42 +1,46 @@
 import type { ComparisonResult } from '../lib/types';
-import { bangunSegmenCicilan } from '../lib/finance';
-import { formatRingkas, tahunDariBulan } from '../lib/format';
+import { bangunCicilanTahunan } from '../lib/finance';
+import { formatRingkas } from '../lib/format';
 
-function nilai(n: number | null): string {
-  return n === null ? 'lunas' : formatRingkas(n);
+/** "Rp 11,6 jt" atau "Rp 11,6 jt → Rp 19,5 jt" bila berubah di tengah tahun. */
+function nilai(nilaiTahun: number[]): string {
+  if (nilaiTahun.length === 0) return 'lunas';
+  return nilaiTahun.map(formatRingkas).join(' → ');
 }
 
 /**
- * Simulasi cicilan sepanjang tenor: tiap baris satu rentang bulan dengan
- * besaran cicilan yang tetap, dibandingkan antara tetap di Bank 1 dan
+ * Simulasi cicilan per tahun sepanjang tenor — tetap di Bank 1 dibanding
  * jalur take over.
  */
 export function TabelCicilan({ result }: { result: ComparisonResult }) {
-  const segmen = bangunSegmenCicilan(result);
+  const baris = bangunCicilanTahunan(result);
 
   return (
     <div className="tblwrap">
       <table className="tbl tbl--simulasi">
         <thead>
           <tr>
-            <th>Periode</th>
+            <th>Tahun</th>
             <th>Tanpa take over</th>
             <th>Dengan take over</th>
           </tr>
         </thead>
         <tbody>
-          {segmen.map((s) => {
-            const lebihRingan = s.tanpa !== null && s.dengan !== null && s.dengan < s.tanpa;
-            const selisih = s.tanpa !== null && s.dengan !== null ? s.tanpa - s.dengan : null;
+          {baris.map((b) => {
+            const tunggal = b.tanpa.length === 1 && b.dengan.length === 1;
+            const selisih = tunggal ? b.tanpa[0] - b.dengan[0] : null;
+            const lebihRingan = selisih !== null && selisih >= 1;
             return (
-              <tr key={s.dari}>
+              <tr key={b.tahun} className={b.takeOver.length ? 'is-pindah' : undefined}>
                 <td>
-                  Bln {s.dari}–{s.sampai}
-                  <em>{s.sampai - s.dari + 1} bln · {tahunDariBulan(s.sampai - s.dari + 1)} th</em>
+                  Tahun {b.tahun}
+                  {b.takeOver.map((urutan) => (
+                    <em key={urutan}>{urutan === 1 ? 'take over' : `take over ke-${urutan}`}</em>
+                  ))}
                 </td>
-                <td>{nilai(s.tanpa)}</td>
+                <td>{nilai(b.tanpa)}</td>
                 <td className={lebihRingan ? 'good' : undefined}>
-                  {nilai(s.dengan)}
+                  {nilai(b.dengan)}
                   {selisih !== null && Math.abs(selisih) >= 1 && (
                     <em>
                       {selisih > 0 ? '▼' : '▲'} {formatRingkas(Math.abs(selisih))}

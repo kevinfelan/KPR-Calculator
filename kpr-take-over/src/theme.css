@@ -549,5 +549,7 @@ button { font-family: inherit; }
 .tbl--simulasi td { padding: 8px 4px; vertical-align: top; }
 .tbl--simulasi td:first-child, .tbl--simulasi th:first-child { white-space: nowrap; }
 .tbl--simulasi td em { display: block; font-style: normal; font-size: 10.5px; color: var(--faint); font-weight: 500; margin-top: 1px; }
+.tbl--simulasi tr.is-pindah td { border-bottom-color: var(--gold); }
+.tbl--simulasi tr.is-pindah td:first-child em { color: var(--gold); font-weight: 700; }
 .tbl--simulasi td.good { color: var(--accent); font-weight: 700; }
 .tbl--simulasi td.good em { color: var(--accent); opacity: 0.85; }

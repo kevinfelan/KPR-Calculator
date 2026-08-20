@@ -23,7 +23,6 @@ export function ResultScreen({ result }: { result: ComparisonResult }) {
   return (
     <Kolaps
       className={`kolaps--hasil ${hemat ? '' : 'kolaps--bad'}`}
-      bawaanTerbuka
       judul={hemat ? 'Kamu hemat' : 'Take over lebih mahal'}
       ringkas={
         <>
