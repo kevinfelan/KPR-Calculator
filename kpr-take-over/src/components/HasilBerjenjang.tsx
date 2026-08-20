@@ -1,44 +1,40 @@
 import type { HasilBerjenjang } from '../lib/types';
+import { bangunTahunanBerjenjang } from '../lib/finance';
 import { formatPersen, formatRingkas, formatRupiah } from '../lib/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { Kolaps } from './Kolaps';
 
-function tahunDari(bulan: number): number {
-  return Math.ceil(bulan / 12);
-}
-
-/** Tabel cicilan tiap jenjang + ringkasan biaya KPR berjenjang. */
+/** Tabel cicilan per tahun + ringkasan biaya KPR berjenjang. */
 export function HasilBerjenjangPanel({ hasil }: { hasil: HasilBerjenjang }) {
+  const baris = bangunTahunanBerjenjang(hasil);
+
   return (
     <>
       <Kolaps
         className="kotak-simulasi"
-        judul="Simulasi cicilan per jenjang"
+        judul="Simulasi cicilan per tahun"
         ringkas="cicilan berubah tiap jenjang"
       >
         <div className="tblwrap">
           <table className="tbl tbl--simulasi">
             <thead>
               <tr>
-                <th>Jenjang</th>
+                <th>Tahun</th>
                 <th>Bunga</th>
                 <th>Cicilan / bln</th>
               </tr>
             </thead>
             <tbody>
-              {hasil.fase.map((f) => (
-                <tr key={f.dariBulan}>
+              {baris.map((b) => (
+                <tr key={b.tahun} className={b.mulaiJenjang.length ? 'is-pindah' : undefined}>
                   <td>
-                    {f.urutan === 0 ? 'Lanjutan' : `Jenjang ${f.urutan}`}
-                    <em>
-                      Tahun {tahunDari(f.dariBulan)} – {tahunDari(f.sampaiBulan)}
-                    </em>
+                    Tahun {b.tahun}
+                    {b.mulaiJenjang.map((urutan) => (
+                      <em key={urutan}>{urutan === 0 ? 'bunga lanjutan' : `jenjang ${urutan}`}</em>
+                    ))}
                   </td>
-                  <td>{formatPersen(f.bunga)}%</td>
-                  <td>
-                    {formatRingkas(f.cicilan)}
-                    <em>bunga {formatRingkas(f.totalBunga)}</em>
-                  </td>
+                  <td>{b.bunga.map((x) => `${formatPersen(x)}%`).join(' → ')}</td>
+                  <td>{b.cicilan.map(formatRingkas).join(' → ')}</td>
                 </tr>
               ))}
             </tbody>

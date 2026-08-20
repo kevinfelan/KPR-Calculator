@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   amortize,
   amortizeBerjenjang,
+  bangunTahunanBerjenjang,
   bangunCicilanTahunan,
   buildComparison,
   seriCicilanDenganTakeOver,
@@ -331,5 +332,57 @@ describe('amortizeBerjenjang — KPR bunga bertingkat', () => {
     });
     expect(pas.fase).toHaveLength(3);
     expect(pas.fase[2].sampaiBulan).toBe(108);
+  });
+});
+
+describe('bangunTahunanBerjenjang — uraian per tahun', () => {
+  const input: KprBerjenjangInput = {
+    pokok: 2_000_000_000,
+    tenorBulan: 240,
+    jenjang: [
+      { sampaiTahun: 3, bunga: 0.03 },
+      { sampaiTahun: 6, bunga: 0.06 },
+      { sampaiTahun: 9, bunga: 0.09 },
+    ],
+    bungaSetelah: 0.12,
+  };
+  const hasil = amortizeBerjenjang(input);
+  const baris = bangunTahunanBerjenjang(hasil);
+
+  it('satu baris per tahun, tahun 1 sampai 20', () => {
+    expect(baris).toHaveLength(20);
+    expect(baris[0].tahun).toBe(1);
+    expect(baris[19].tahun).toBe(20);
+  });
+
+  it('bunga tiap tahun mengikuti jenjangnya', () => {
+    expect(baris[0].bunga).toEqual([0.03]);
+    expect(baris[2].bunga).toEqual([0.03]);
+    expect(baris[3].bunga).toEqual([0.06]);
+    expect(baris[6].bunga).toEqual([0.09]);
+    expect(baris[9].bunga).toEqual([0.12]);
+    expect(baris[19].bunga).toEqual([0.12]);
+  });
+
+  it('cicilan tetap selama satu jenjang dan berubah di jenjang berikutnya', () => {
+    expect(baris[0].cicilan).toEqual([Math.round(hasil.fase[0].cicilan)]);
+    expect(baris[1].cicilan).toEqual(baris[0].cicilan);
+    expect(baris[3].cicilan).toEqual([Math.round(hasil.fase[1].cicilan)]);
+    expect(baris[3].cicilan[0]).toBeGreaterThan(baris[2].cicilan[0]);
+  });
+
+  it('tahun awal tiap jenjang ditandai', () => {
+    expect(baris[0].mulaiJenjang).toEqual([1]);
+    expect(baris[3].mulaiJenjang).toEqual([2]);
+    expect(baris[6].mulaiJenjang).toEqual([3]);
+    expect(baris[9].mulaiJenjang).toEqual([0]); // fase lanjutan
+    expect(baris[1].mulaiJenjang).toEqual([]);
+  });
+
+  it('tenor yang tidak genap setahun tetap masuk baris terakhir', () => {
+    const ganjil = amortizeBerjenjang({ ...input, tenorBulan: 246 });
+    const bg = bangunTahunanBerjenjang(ganjil);
+    expect(bg).toHaveLength(21);
+    expect(bg[20].cicilan).toHaveLength(1);
   });
 });

@@ -208,14 +208,21 @@ export interface CicilanTahunan {
   takeOver: number[];
 }
 
-/** Nilai unik berurutan dari sepotong deret — [12,12,19,19] jadi [12,19]. */
-function nilaiUnik(seri: number[], dari: number, sampai: number): number[] {
+/**
+ * Nilai unik berurutan dari sepotong deret — [12,12,19,19] jadi [12,19].
+ * Parameter bulatkan dipakai untuk nilai rupiah; angka bunga dibiarkan apa adanya.
+ */
+function unikBerurutan(seri: number[], dari: number, sampai: number, bulatkan: boolean): number[] {
   const keluar: number[] = [];
   for (let i = dari; i < sampai && i < seri.length; i++) {
-    const v = Math.round(seri[i]);
+    const v = bulatkan ? Math.round(seri[i]) : seri[i];
     if (keluar.length === 0 || keluar[keluar.length - 1] !== v) keluar.push(v);
   }
   return keluar;
+}
+
+function nilaiUnik(seri: number[], dari: number, sampai: number): number[] {
+  return unikBerurutan(seri, dari, sampai, true);
 }
 
 /**
@@ -317,4 +324,44 @@ export function amortizeBerjenjang(input: KprBerjenjangInput): HasilBerjenjang {
     cicilanAwal: fase.length ? fase[0].cicilan : 0,
     cicilanAkhir: fase.length ? fase[fase.length - 1].cicilan : 0,
   };
+}
+
+/** Satu tahun pada KPR berjenjang. */
+export interface TahunBerjenjang {
+  tahun: number;
+  /** Bunga per tahun yang berlaku, urut waktu — dua nilai bila berubah di tengah tahun. */
+  bunga: number[];
+  /** Cicilan per bulan, urut waktu. */
+  cicilan: number[];
+  /** Urutan jenjang yang mulai berlaku di tahun ini (0 = fase lanjutan). */
+  mulaiJenjang: number[];
+}
+
+/** Uraikan hasil KPR berjenjang jadi satu baris per tahun. */
+export function bangunTahunanBerjenjang(hasil: HasilBerjenjang): TahunBerjenjang[] {
+  const n = hasil.rows.length;
+  const bungaBulan: number[] = new Array(n).fill(0);
+  const cicilanBulan: number[] = new Array(n).fill(0);
+
+  for (const f of hasil.fase) {
+    for (let t = f.dariBulan; t <= f.sampaiBulan && t <= n; t++) {
+      bungaBulan[t - 1] = f.bunga;
+      cicilanBulan[t - 1] = f.cicilan;
+    }
+  }
+
+  const baris: TahunBerjenjang[] = [];
+  for (let t = 1; t <= Math.ceil(n / 12); t++) {
+    const dari = (t - 1) * 12;
+    const sampai = t * 12;
+    baris.push({
+      tahun: t,
+      bunga: unikBerurutan(bungaBulan, dari, sampai, false),
+      cicilan: unikBerurutan(cicilanBulan, dari, sampai, true),
+      mulaiJenjang: hasil.fase
+        .filter((f) => Math.ceil(f.dariBulan / 12) === t)
+        .map((f) => f.urutan),
+    });
+  }
+  return baris;
 }
