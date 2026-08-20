@@ -3,6 +3,7 @@ import { formatRingkas, formatRupiah, formatPersenLabel } from '../lib/format';
 import { HouseArt } from './HouseArt';
 import { AnimatedNumber } from './AnimatedNumber';
 import { CicilanCompare } from './CicilanCompare';
+import { Kolaps } from './Kolaps';
 import { TAMPILKAN_SOROTAN_CICILAN } from '../tampilan';
 
 /** Label baris bunga untuk tiap KPR pada rantai take over. */
@@ -20,7 +21,19 @@ export function ResultScreen({ result }: { result: ComparisonResult }) {
   const cicilanAwal = result.kpr1.cicilanFloating;
 
   return (
-    <div className={`panel-result ${hemat ? '' : 'panel-result--bad'}`}>
+    <Kolaps
+      className={`kolaps--hasil ${hemat ? '' : 'kolaps--bad'}`}
+      bawaanTerbuka
+      judul={hemat ? 'Kamu hemat' : 'Take over lebih mahal'}
+      ringkas={
+        <>
+          {formatRingkas(Math.abs(result.selisih))}
+          <em>
+            {hemat ? '▼' : '▲'} {formatPersenLabel(Math.abs(result.selisihPersen))}
+          </em>
+        </>
+      }
+    >
       {TAMPILKAN_SOROTAN_CICILAN && (
         <div className="pr__hero">
           <span className="pr__cap">Cicilan per bulan</span>
@@ -59,7 +72,6 @@ export function ResultScreen({ result }: { result: ComparisonResult }) {
 
       <div className="pr__summary">
         <HouseArt className="pr__art" />
-        <span className="pr__cap">{hemat ? 'Kamu hemat' : 'Take over lebih mahal'}</span>
         <span className="pr__value">
           <AnimatedNumber value={Math.abs(result.selisih)} format={formatRingkas} />
         </span>
@@ -70,6 +82,6 @@ export function ResultScreen({ result }: { result: ComparisonResult }) {
           Tanpa take over {formatRingkas(result.totalTanpaTakeOver)} → dengan take over {formatRingkas(result.totalDenganTakeOver)}
         </span>
       </div>
-    </div>
+    </Kolaps>
   );
 }

@@ -171,3 +171,59 @@ export function buildComparison(
     hemat: selisih > 0,
   };
 }
+
+/** Satu potongan waktu dengan besaran cicilan yang tetap di kedua skenario. */
+export interface SegmenCicilan {
+  /** Bulan awal segmen, dihitung dari sekarang (1 = bulan depan). */
+  dari: number;
+  /** Bulan akhir segmen. */
+  sampai: number;
+  /** Cicilan per bulan bila tetap di Bank 1; null bila KPR sudah lunas. */
+  tanpa: number | null;
+  /** Cicilan per bulan bila take over; null bila KPR sudah lunas. */
+  dengan: number | null;
+}
+
+/** Deret cicilan per bulan bila tetap di Bank 1 sampai lunas. */
+export function seriCicilanTanpaTakeOver(hasil: ComparisonResult): number[] {
+  return hasil.kpr1.rows.map((r) => r.cicilan);
+}
+
+/** Deret cicilan per bulan pada jalur take over, menyambung antar tahap. */
+export function seriCicilanDenganTakeOver(hasil: ComparisonResult): number[] {
+  const seri: number[] = [];
+  let berjalan = hasil.kpr1;
+  for (const tahap of hasil.tahap) {
+    for (let i = 0; i < tahap.bulan; i++) seri.push(berjalan.rows[i].cicilan);
+    berjalan = tahap.kpr;
+  }
+  for (const r of berjalan.rows) seri.push(r.cicilan);
+  return seri;
+}
+
+/**
+ * Ringkas kedua deret cicilan jadi segmen — bulan-bulan berurutan dengan
+ * besaran cicilan yang sama digabung, supaya tabelnya cukup beberapa baris
+ * alih-alih ratusan.
+ */
+export function bangunSegmenCicilan(hasil: ComparisonResult): SegmenCicilan[] {
+  const tanpa = seriCicilanTanpaTakeOver(hasil);
+  const dengan = seriCicilanDenganTakeOver(hasil);
+  const n = Math.max(tanpa.length, dengan.length);
+
+  const ambil = (seri: number[], i: number): number | null =>
+    i < seri.length ? Math.round(seri[i]) : null;
+
+  const segmen: SegmenCicilan[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = ambil(tanpa, i);
+    const b = ambil(dengan, i);
+    const terakhir = segmen[segmen.length - 1];
+    if (terakhir && terakhir.tanpa === a && terakhir.dengan === b) {
+      terakhir.sampai = i + 1;
+    } else {
+      segmen.push({ dari: i + 1, sampai: i + 1, tanpa: a, dengan: b });
+    }
+  }
+  return segmen;
+}

@@ -3,6 +3,8 @@ import { useSimulation } from './state/useSimulation';
 import { Logo } from './components/Logo';
 import { InputScreen } from './components/InputScreen';
 import { ResultScreen } from './components/ResultScreen';
+import { TabelCicilan } from './components/TabelCicilan';
+import { Kolaps } from './components/Kolaps';
 import { ResultDetails } from './components/ResultDetails';
 import { HistoryTable } from './components/HistoryTable';
 import { SaveDialog } from './components/SaveDialog';
@@ -237,7 +239,16 @@ export default function App() {
             />
             <div className="maincard__result" ref={resultRef}>
               {sim.result ? (
-                <ResultScreen result={sim.result} />
+                <>
+                  <Kolaps
+                    className="kotak-simulasi"
+                    judul="Simulasi cicilan selama tenor"
+                    ringkas="sebelum vs sesudah take over"
+                  >
+                    <TabelCicilan result={sim.result} />
+                  </Kolaps>
+                  <ResultScreen result={sim.result} />
+                </>
               ) : (
                 <div className="panel-result panel-result--empty">
                   Lengkapi data yang valid untuk melihat hasil simulasi.

@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { amortize, buildComparison } from './finance';
+import {
+  amortize,
+  bangunSegmenCicilan,
+  buildComparison,
+  seriCicilanDenganTakeOver,
+  seriCicilanTanpaTakeOver,
+} from './finance';
 import type { KprInput, TakeOverInput } from './types';
 
 // Skenario referensi persis dari file "Perhitungan KPR Take Over.xlsx".
@@ -156,5 +162,77 @@ describe('buildComparison — take over dua kali', () => {
     expect(netral.pokokPindah).toBeCloseTo(satuTahap.pokokPindah, 6);
     expect(netral.bungaKpr1).toBeCloseTo(satuTahap.bungaKpr1, 6);
     expect(netral.kpr2.cicilanFix).toBeCloseTo(satuTahap.kpr2.cicilanFix, 6);
+  });
+});
+
+describe('segmen cicilan — simulasi selama tenor', () => {
+  const c = buildComparison(kpr1, takeOver);
+  const segmen = bangunSegmenCicilan(c);
+
+  it('deret cicilan menutupi seluruh tenor', () => {
+    expect(seriCicilanTanpaTakeOver(c)).toHaveLength(240);
+    expect(seriCicilanDenganTakeOver(c)).toHaveLength(240);
+  });
+
+  it('sebelum take over kedua jalur masih sama', () => {
+    expect(segmen[0]).toMatchObject({ dari: 1, sampai: 60 });
+    expect(segmen[0].tanpa).toBe(segmen[0].dengan);
+  });
+
+  it('terpecah di titik take over & akhir masa fix Bank 2', () => {
+    expect(segmen.map((s) => [s.dari, s.sampai])).toEqual([
+      [1, 60],
+      [61, 120],
+      [121, 240],
+    ]);
+  });
+
+  it('nilai tiap segmen cocok dengan cicilan fix/floating masing-masing KPR', () => {
+    expect(segmen[1].tanpa).toBe(Math.round(c.kpr1.cicilanFloating));
+    expect(segmen[1].dengan).toBe(Math.round(c.kpr2.cicilanFix));
+    expect(segmen[2].tanpa).toBe(Math.round(c.kpr1.cicilanFloating));
+    expect(segmen[2].dengan).toBe(Math.round(c.kpr2.cicilanFloating));
+  });
+
+  it('segmen bersambung tanpa bolong', () => {
+    for (let i = 1; i < segmen.length; i++) {
+      expect(segmen[i].dari).toBe(segmen[i - 1].sampai + 1);
+    }
+    expect(segmen[segmen.length - 1].sampai).toBe(240);
+  });
+
+  it('take over ke-2 dengan bunga berbeda menambah titik pecah', () => {
+    const dua = buildComparison(kpr1, takeOver, 60, [
+      {
+        bulan: 60,
+        input: { ...takeOver, tenorBulan: 120, masaFixBulan: 36, bungaFix: 0.03, bungaFloating: 0.09 },
+      },
+    ]);
+    const s2 = bangunSegmenCicilan(dua);
+    expect(s2.length).toBeGreaterThan(segmen.length);
+    expect(s2[0]).toMatchObject({ dari: 1, sampai: 60 });
+    expect(s2[s2.length - 1].sampai).toBe(240);
+  });
+
+  it('take over ke-2 dengan syarat identik tidak memecah segmen', () => {
+    // Anuitas ulang atas sisa pokok dengan bunga yang sama menghasilkan cicilan
+    // yang sama persis, jadi segmennya memang harus menyatu.
+    const netral = buildComparison(kpr1, takeOver, 60, [
+      { bulan: 60, input: { ...takeOver, tenorBulan: 120, masaFixBulan: 36 } },
+    ]);
+    const sn = bangunSegmenCicilan(netral);
+    expect(sn[1].dengan).toBe(Math.round(c.kpr2.cicilanFix));
+    expect(sn[1].sampai).toBe(156);
+  });
+
+  it('jalur yang lunas lebih dulu ditandai null', () => {
+    // Tenor baru dipendekkan manual jadi 60 bulan: jalur take over lunas di
+    // bulan ke-120, sementara tanpa take over masih jalan sampai 240.
+    const pendek = buildComparison(kpr1, { ...takeOver, tenorBulan: 60, masaFixBulan: 60 }, 60);
+    const sp = bangunSegmenCicilan(pendek);
+    const akhir = sp[sp.length - 1];
+    expect(akhir.dengan).toBeNull();
+    expect(akhir.sampai).toBe(240);
+    expect(akhir.tanpa).toBe(Math.round(pendek.kpr1.cicilanFloating));
   });
 });
