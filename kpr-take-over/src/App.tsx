@@ -208,9 +208,9 @@ export default function App() {
           </div>
         </div>
         <h1 className="masthead__title">
-          Hitung Simulasi Cicilan <span className="hl">Take Over</span> mu!
+          Hitung Simulasi Cicilan <span className="hl">Rumah</span> mu!
         </h1>
-        <p className="masthead__sub">Kalkulator take over KPR gratis — bandingkan biaya, lihat hematnya secara instan.</p>
+        <p className="masthead__sub">Kalkulator KPR gratis — bandingkan biaya, lihat hasilnya secara instan!</p>
       </header>
 
       <main className="wrap">
