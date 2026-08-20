@@ -121,9 +121,10 @@ button { font-family: inherit; }
 .iconround--wa:disabled { background: #25d366; border-color: #25d366; }
 .iconround--wa:hover [class^='i-'] { transform: none; }
 
+/* Judul dijaga tetap satu baris: ukurannya ikut lebar layar. */
 .masthead__title {
-  margin: 0; font-size: clamp(30px, 6vw, 46px); line-height: 1.04; letter-spacing: -0.02em;
-  font-weight: 800; color: var(--ink);
+  margin: 0; font-size: clamp(15px, 5.1vw, 44px); line-height: 1.1; letter-spacing: -0.02em;
+  font-weight: 800; color: var(--ink); white-space: nowrap;
 }
 .hl { color: var(--accent); }
 .badge-pct {
@@ -446,7 +447,7 @@ button { font-family: inherit; }
   /* kepala halaman diringkas di HP supaya panel hasil lebih cepat terlihat */
   .masthead { padding: 12px 14px 2px; }
   .masthead__bar { margin-bottom: 10px; }
-  .masthead__title { font-size: clamp(22px, 6.6vw, 32px); line-height: 1.06; }
+  .masthead__title { line-height: 1.1; }
   .masthead__sub { font-size: 13px; line-height: 1.4; margin-top: 6px; }
   .wrap { padding: 8px 12px 24px; }
   .maincard__head { padding: 12px 12px 0; }
