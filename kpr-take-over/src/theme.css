@@ -589,3 +589,26 @@ button { font-family: inherit; }
   display: inline-block; font-size: 11px; font-weight: 700; white-space: nowrap;
   background: var(--gold-soft); color: var(--gold-ink); border-radius: 999px; padding: 3px 9px;
 }
+
+/* baris kanan pada kepala jenjang: rentang tahun + tombol hapus */
+.jenjang__kanan { display: inline-flex; align-items: baseline; gap: 10px; }
+.jenjang__kanan .linkbtn { font-size: 11.5px; color: var(--muted); }
+.jenjang__kanan .linkbtn:hover { color: var(--bad); }
+.jenjang + .addbtn { margin-top: 14px; }
+
+/* ------------------- tarik untuk muat ulang (PWA) ------------------------ */
+/* Hanya di PWA terpasang: pantulan gulir dimatikan agar tarikan kita yang
+   dipakai, bukan gerakan bawaan sistem. */
+.pwa-terpasang, .pwa-terpasang body { overscroll-behavior-y: contain; }
+.ptr {
+  position: fixed; top: calc(4px + env(safe-area-inset-top)); left: 50%; z-index: 60;
+  width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); pointer-events: none;
+}
+.ptr__ikon { font-size: 19px; line-height: 1; color: var(--muted); transition: color 0.15s; }
+.ptr__ikon.is-siap { color: var(--gold); }
+.ptr.is-muat .ptr__ikon { color: var(--gold); animation: ptr-putar 0.8s linear infinite; rotate: none !important; }
+@keyframes ptr-putar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .ptr.is-muat .ptr__ikon { animation: none; }
+}

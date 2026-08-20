@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSimulation } from './state/useSimulation';
 import { useBerjenjang } from './state/useBerjenjang';
+import { useTarikSegarkan } from './state/useTarikSegarkan';
 import { Logo } from './components/Logo';
 import { InputScreen } from './components/InputScreen';
 import { ResultScreen } from './components/ResultScreen';
 import { TabelCicilan } from './components/TabelCicilan';
 import { Kolaps } from './components/Kolaps';
 import { Switch } from './components/Switch';
+import { TarikSegarkan } from './components/TarikSegarkan';
 import { InputBerjenjang } from './components/InputBerjenjang';
 import { HasilBerjenjangPanel } from './components/HasilBerjenjang';
 import { ResultDetails } from './components/ResultDetails';
@@ -24,6 +26,7 @@ export default function App() {
   const sim = useSimulation();
   const bj = useBerjenjang();
   const [mode, setMode] = useState<'takeover' | 'berjenjang'>('takeover');
+  const tarik = useTarikSegarkan();
   const adaHasil = mode === 'takeover' ? !!sim.result : !!bj.hasil;
   const [sims, setSims] = useState<SavedSim[]>([]);
   const [drawer, setDrawer] = useState(false);
@@ -215,6 +218,8 @@ export default function App() {
 
   return (
     <div className="app">
+      <TarikSegarkan jarak={tarik.jarak} menyegarkan={tarik.menyegarkan} ambang={tarik.ambang} />
+
       <header className="masthead">
         <div className="masthead__bar">
           <div className="logo">
@@ -320,6 +325,9 @@ export default function App() {
                 tenorTahun={bj.tenorTahun}
                 patch={bj.patch}
                 patchJenjang={bj.patchJenjang}
+                tambahJenjang={bj.tambahJenjang}
+                hapusJenjang={bj.hapusJenjang}
+                bisaTambah={bj.bisaTambah}
               />
               <div className="maincard__result">
                 {bj.hasil ? (

@@ -10,12 +10,27 @@ interface Props {
   tenorTahun: number;
   patch: (p: Partial<KprBerjenjangInput>) => void;
   patchJenjang: (i: number, p: Partial<JenjangBunga>) => void;
+  tambahJenjang: () => void;
+  hapusJenjang: (i: number) => void;
+  /** false bila jumlah jenjang sudah mentok di batas. */
+  bisaTambah: boolean;
 }
 
 const TENOR_PRESETS = [60, 120, 180, 240, 300, 360];
 
 export function InputBerjenjang(props: Props) {
-  const { input, mulaiTahun, urutanNaik, adaSisaTenor, tenorTahun, patch, patchJenjang } = props;
+  const {
+    input,
+    mulaiTahun,
+    urutanNaik,
+    adaSisaTenor,
+    tenorTahun,
+    patch,
+    patchJenjang,
+    tambahJenjang,
+    hapusJenjang,
+    bisaTambah,
+  } = props;
   const jenjangTerakhir = input.jenjang[input.jenjang.length - 1]?.sampaiTahun ?? 0;
 
   return (
@@ -60,8 +75,20 @@ export function InputBerjenjang(props: Props) {
             <div className="jenjang" key={i}>
               <div className="jenjang__head">
                 <span className="jenjang__nama">Jenjang Bunga {i + 1}</span>
-                <span className={`jenjang__rentang ${rentangValid ? '' : 'is-salah'}`}>
-                  {rentangValid ? `Tahun ${dari} – ${j.sampaiTahun}` : 'rentang tidak valid'}
+                <span className="jenjang__kanan">
+                  <span className={`jenjang__rentang ${rentangValid ? '' : 'is-salah'}`}>
+                    {rentangValid ? `Tahun ${dari} – ${j.sampaiTahun}` : 'rentang tidak valid'}
+                  </span>
+                  {input.jenjang.length > 1 && (
+                    <button
+                      type="button"
+                      className="linkbtn"
+                      onClick={() => hapusJenjang(i)}
+                      aria-label={`Hapus jenjang bunga ${i + 1}`}
+                    >
+                      Hapus
+                    </button>
+                  )}
                 </span>
               </div>
               <div className="grid2">
@@ -79,6 +106,18 @@ export function InputBerjenjang(props: Props) {
         })}
 
         {!urutanNaik && <p className="warn">Tahun tiap jenjang harus lebih besar dari jenjang sebelumnya.</p>}
+
+        {bisaTambah ? (
+          <button type="button" className="addbtn" onClick={tambahJenjang}>
+            <span className="addbtn__plus" aria-hidden>+</span>
+            <span className="addbtn__text">
+              Tambah jenjang bunga
+              <em>jenjang ke-{input.jenjang.length + 1}, menyambung dari tahun {(input.jenjang[input.jenjang.length - 1]?.sampaiTahun ?? 0) + 1}</em>
+            </span>
+          </button>
+        ) : (
+          <p className="section__ket">Sudah mencapai batas {input.jenjang.length} jenjang.</p>
+        )}
 
         <div className="subhead">Setelah jenjang terakhir</div>
         <PercentField
