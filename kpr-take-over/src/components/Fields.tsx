@@ -60,7 +60,7 @@ export function MoneyField({ label, value, onChange, info, sliderMin, sliderMax,
         <span className="field__prefix">Rp</span>
         <input
           inputMode="numeric"
-          value={formatAngka(value)}
+          value={value === 0 ? '' : formatAngka(value)}
           onChange={(e) => onChange(parseAngka(e.target.value))}
           onFocus={(e) => e.target.select()}
         />
@@ -191,12 +191,11 @@ interface UnitProps {
   value: number;
   onChange: (v: number) => void;
   suffix: string;
-  step?: number;
   max?: number;
   info?: string;
 }
 
-export function NumberField({ label, value, onChange, suffix, step = 1, max, info }: UnitProps) {
+export function NumberField({ label, value, onChange, suffix, max, info }: UnitProps) {
   return (
     <label className="field">
       <span className="field__label">
@@ -205,12 +204,13 @@ export function NumberField({ label, value, onChange, suffix, step = 1, max, inf
       </span>
       <span className="field__control">
         <input
-          type="number"
-          min={0}
-          max={max}
-          step={step}
-          value={Number.isFinite(value) ? value : ''}
-          onChange={(e) => onChange(Number(e.target.value))}
+          inputMode="numeric"
+          value={value === 0 || !Number.isFinite(value) ? '' : String(value)}
+          onChange={(e) => {
+            const d = e.target.value.replace(/[^\d]/g, '');
+            const n = d === '' ? 0 : parseInt(d, 10);
+            onChange(max !== undefined ? Math.min(n, max) : n);
+          }}
           onFocus={(e) => e.target.select()}
         />
         <span className="field__suffix">{suffix}</span>

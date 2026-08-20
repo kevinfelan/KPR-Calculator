@@ -1,40 +1,41 @@
 import type { HasilBerjenjang } from '../lib/types';
-import { bangunTahunanBerjenjang } from '../lib/finance';
 import { formatPersen, formatRingkas, formatRupiah } from '../lib/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { Kolaps } from './Kolaps';
 
 /** Tabel cicilan per tahun + ringkasan biaya KPR berjenjang. */
-export function HasilBerjenjangPanel({ hasil }: { hasil: HasilBerjenjang }) {
-  const baris = bangunTahunanBerjenjang(hasil);
+function tahunDari(bulan: number): number {
+  return Math.ceil(bulan / 12);
+}
 
+export function HasilBerjenjangPanel({ hasil }: { hasil: HasilBerjenjang }) {
   return (
     <>
       <Kolaps
         className="kotak-simulasi"
-        judul="Simulasi cicilan per tahun"
+        judul="Simulasi cicilan per jenjang"
         ringkas="cicilan berubah tiap jenjang"
       >
         <div className="tblwrap">
           <table className="tbl tbl--simulasi">
             <thead>
               <tr>
-                <th>Tahun</th>
+                <th>Jenjang</th>
                 <th>Bunga</th>
                 <th>Cicilan / bln</th>
               </tr>
             </thead>
             <tbody>
-              {baris.map((b) => (
-                <tr key={b.tahun} className={b.mulaiJenjang.length ? 'is-pindah' : undefined}>
+              {hasil.fase.map((f) => (
+                <tr key={f.dariBulan}>
                   <td>
-                    Tahun {b.tahun}
-                    {b.mulaiJenjang.map((urutan) => (
-                      <em key={urutan}>{urutan === 0 ? 'bunga lanjutan' : `jenjang ${urutan}`}</em>
-                    ))}
+                    {f.urutan === 0 ? 'Bunga lanjutan' : `Jenjang ${f.urutan}`}
+                    <em>
+                      Tahun {tahunDari(f.dariBulan)} – {tahunDari(f.sampaiBulan)}
+                    </em>
                   </td>
-                  <td>{b.bunga.map((x) => `${formatPersen(x)}%`).join(' → ')}</td>
-                  <td>{b.cicilan.map(formatRingkas).join(' → ')}</td>
+                  <td>{formatPersen(f.bunga)}%</td>
+                  <td>{formatRingkas(f.cicilan)}</td>
                 </tr>
               ))}
             </tbody>
